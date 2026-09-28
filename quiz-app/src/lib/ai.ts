@@ -71,11 +71,14 @@ export type GenerateResult =
   | { ok: true; questions: Question[] }
   | { ok: false; reason: string };
 
-/** Generate a personalized interview from profile + target role. */
+/** Generate a personalized interview. Resume/profile optional (quick setup). */
 export async function generateInterview(input: {
-  profile: CandidateProfile;
-  resumeExcerpt: string;
-  role: string;
+  profile?: CandidateProfile | null;
+  resumeExcerpt?: string;
+  role?: string;
+  company?: string;
+  industry?: string;
+  topicFocus?: string;
   difficulty: Difficulty;
   count: number;
 }): Promise<GenerateResult> {

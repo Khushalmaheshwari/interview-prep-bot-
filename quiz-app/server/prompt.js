@@ -60,27 +60,30 @@ export function parseProfile(rawText) {
 export const INTERVIEW_SYSTEM = `You generate personalized interview questions for a job candidate.
 
 Rules:
-- Ground resume-based questions ONLY in the provided profile and resume excerpts. Never invent facts about the candidate.
-- Mix the requested counts of technical, resume-based, behavioral, situational and scenario questions across the candidate's topics.
+- When a candidate profile/resume is provided: ground resume-based questions ONLY in it. Never invent facts about the candidate.
+- When NO resume is provided: generate role/company/industry-based technical, behavioral, situational and scenario questions. Do NOT invent candidate background and do NOT include resume-based questions.
+- Mix the requested question kinds across relevant topics.
 - Match the requested difficulty (Easy = fundamentals, Medium = applied, Hard = deep/ambiguous).
 - Every MCQ/True-False needs exactly one correct option, a short explanation and an interview tip.
 - Every scenario/behavioral question needs an ideal answer, 2-3 evaluation points and an interview tip.
 - Keep each field to 1-3 sentences.
-- Return ONLY the JSON object described below. No markdown, no code fences, no extra keys.`;
+- Return ONLY the JSON object described below, on a single line with no line breaks. No markdown, no code fences, no extra keys.`;
 
-export function buildInterviewMessage({ profile, role, difficulty, count, resumeExcerpt }) {
-  return `Candidate profile:
-${JSON.stringify(profile)}
-
-Target role: ${role}
-Difficulty: ${difficulty}
-Number of questions: ${count}
-Resume excerpts (do not go beyond these facts):
-${resumeExcerpt}
-
-Generate a mix of technical, resume-based, behavioral, situational and scenario questions for this candidate and role.
-Respond with ONLY this JSON object:
-{"questions": [{"topic": "<short topic label>", "difficulty": "<Easy|Medium|Hard>", "type": "<mcq|true_false|scenario|behavioral>", "question": "<text>", "options": ["<A>", "<B>", "<C>", "<D>"], "correct_answer": "<one of options>", "explanation": "<why>", "interview_tip": "<tip>", "ideal_answer": "<for scenario/behavioral>", "evaluation_points": ["<point>"]}]}`;
+export function buildInterviewMessage({ profile, resumeExcerpt, role, company, industry, topicFocus, difficulty, count }) {
+  const hasResume = profile && typeof profile === "object" && Object.keys(profile).length > 0;
+  const lines = [
+    `Target role: ${role || "(general)"}`,
+    company ? `Company: ${company}` : null,
+    industry ? `Industry: ${industry}` : null,
+    topicFocus ? `Topic focus: ${topicFocus}` : null,
+    `Difficulty: ${difficulty}`,
+    `Number of questions: ${count}`,
+  ].filter(Boolean);
+  const header = lines.join("\n");
+  const resumePart = hasResume
+    ? `Candidate profile:\n${JSON.stringify(profile)}\n\nResume excerpts (do not go beyond these facts):\n${resumeExcerpt || "(none)"}\n\nGenerate a mix of technical, resume-based, behavioral, situational and scenario questions for this candidate and role.`
+    : `No resume provided. Generate role-based technical, behavioral, situational and scenario questions (no resume-based questions).`;
+  return `${header}\n\n${resumePart}\nRespond with ONLY this JSON object:\n{"questions": [{"topic": "<short topic label>", "difficulty": "<Easy|Medium|Hard>", "type": "<mcq|true_false|scenario|behavioral>", "question": "<text>", "options": ["<A>", "<B>", "<C>", "<D>"], "correct_answer": "<one of options>", "explanation": "<why>", "interview_tip": "<tip>", "ideal_answer": "<for scenario/behavioral>", "evaluation_points": ["<point>"]}]}`;
 }
 
 const DIFFS = ["Easy", "Medium", "Hard"];

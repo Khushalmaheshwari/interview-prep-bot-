@@ -79,6 +79,7 @@ app.post("/api/resume/analyze", async (req, res) => {
     system: RESUME_SYSTEM,
     user: buildResumeMessage(text.slice(0, 12000)),
     maxTokens: 1400,
+    timeoutMs: 90000,
   });
   if (!result.ok) return res.json(result);
   const profile = parseProfile(result.text);
@@ -99,11 +100,12 @@ app.post("/api/resume/analyze", async (req, res) => {
 const DIFFS = ["Easy", "Medium", "Hard"];
 
 app.post("/api/interview/generate", async (req, res) => {
-  const { profile, resumeExcerpt, role, difficulty, count } = req.body || {};
-  if (!profile || typeof profile !== "object") {
-    return res.status(400).json({ ok: false, reason: "bad_request" });
-  }
-  if (typeof role !== "string" || !role.trim() || role.length > 80) {
+  const { profile, resumeExcerpt, role, company, industry, topicFocus, difficulty, count } = req.body || {};
+  // Resume is optional (quick setup without resume). Role or topic focus is required.
+  const clean = (v) => (typeof v === "string" ? v.trim().slice(0, 80) : "");
+  const r = clean(role);
+  const t = clean(topicFocus);
+  if (!r && !t) {
     return res.status(400).json({ ok: false, reason: "bad_request" });
   }
   const diff = DIFFS.includes(difficulty) ? difficulty : "Medium";
@@ -113,14 +115,17 @@ app.post("/api/interview/generate", async (req, res) => {
   const result = await geminiChat({
     system: INTERVIEW_SYSTEM,
     user: buildInterviewMessage({
-      profile,
-      role: role.trim(),
+      profile: profile && typeof profile === "object" ? profile : null,
+      role: r || t,
+      company: clean(company),
+      industry: clean(industry),
+      topicFocus: t,
       difficulty: diff,
       count: n,
       resumeExcerpt: String(resumeExcerpt || "").slice(0, 4000),
     }),
     maxTokens: 3000,
-    timeoutMs: 90000,
+    timeoutMs: 120000,
   });
   if (!result.ok) return res.json(result);
   const questions = parseInterviewQuestions(result.text, n, diff);

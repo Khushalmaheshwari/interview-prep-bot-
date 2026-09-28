@@ -1,54 +1,50 @@
-import { useMemo, useState } from "react";
+import { useState } from "react";
+import BankSetup from "./components/BankSetup";
 import Dashboard from "./components/Dashboard";
 import InterviewSetup from "./components/InterviewSetup";
 import ProfileCard from "./components/ProfileCard";
+import QuickSetup from "./components/QuickSetup";
 import QuizRunner from "./components/QuizRunner";
 import Results from "./components/Results";
 import ResumeUpload from "./components/ResumeUpload";
 import { generateInterview } from "./lib/ai";
 import { loadSessions } from "./lib/history";
-import { countBy, selectQuestions } from "./lib/quiz";
+import { selectQuestions } from "./lib/quiz";
 import type { Recommendation } from "./lib/dashboard";
 import {
-  DIFFICULTIES,
-  QUESTION_COUNTS,
-  TOPICS,
   type AnswerRecord,
   type CandidateProfile,
   type Difficulty,
   type Question,
   type QuizConfig,
   type QuizSession,
-  type Topic,
 } from "./types";
 
 type Screen =
   | "home"
   | "upload"
   | "profile"
+  | "quick"
   | "bank"
   | "quiz"
   | "results"
   | "dashboard";
 
+/** Where the current quiz came from (drives Back/Retake routing). */
+type Flow = "resume" | "quick" | "topic" | "bank";
+
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
+  const [flow, setFlow] = useState<Flow>("bank");
 
   // Personalized flow state (session only — resume never leaves memory).
   const [profile, setProfile] = useState<CandidateProfile | null>(null);
   const [resumeExcerpt, setResumeExcerpt] = useState("");
   const [resumeFileName, setResumeFileName] = useState("");
   const [role, setRole] = useState("Financial Analyst");
-  const [personalized, setPersonalized] = useState(false);
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
-
-  // Classic bank flow state.
-  const [config, setConfig] = useState<QuizConfig>({
-    topic: "FP&A",
-    difficulty: "Medium",
-    count: 5,
-  });
+  const [lastBankConfig, setLastBankConfig] = useState<QuizConfig | null>(null);
 
   // Running quiz state.
   const [picked, setPicked] = useState<Question[]>([]);
@@ -57,15 +53,12 @@ export default function App() {
   const [runDifficulty, setRunDifficulty] = useState<Difficulty>("Medium");
   const [sessions, setSessions] = useState<QuizSession[]>([]);
 
-  const available = useMemo(
-    () => countBy(config.topic, config.difficulty),
-    [config.topic, config.difficulty]
-  );
+  const personalized = flow !== "bank";
 
-  const beginQuiz = (questions: Question[], isPersonalized: boolean) => {
+  const beginQuiz = (questions: Question[], nextFlow: Flow) => {
     setPicked(questions);
     setAnswers([]);
-    setPersonalized(isPersonalized);
+    setFlow(nextFlow);
     setRunId((n) => n + 1);
     setScreen("quiz");
   };
@@ -73,6 +66,7 @@ export default function App() {
   const startPersonalized = async (r: string, difficulty: Difficulty, count: number) => {
     if (!profile || generating) return;
     setRole(r);
+    setRunDifficulty(difficulty);
     setGenerating(true);
     setGenerateError(null);
     const result = await generateInterview({
@@ -84,16 +78,28 @@ export default function App() {
     });
     setGenerating(false);
     if (result.ok) {
-      setRunDifficulty(difficulty);
-      beginQuiz(result.questions, true);
+      beginQuiz(result.questions, "resume");
     } else {
       setGenerateError(result.reason);
     }
   };
 
-  const startBankQuiz = () => {
+  const startQuick = (questions: Question[], meta: { role: string; difficulty: Difficulty }) => {
+    setRole(meta.role);
+    setRunDifficulty(meta.difficulty);
+    beginQuiz(questions, "quick");
+  };
+
+  const startTopic = (questions: Question[], meta: { role: string; difficulty: Difficulty }) => {
+    setRole(meta.role);
+    setRunDifficulty(meta.difficulty);
+    beginQuiz(questions, "topic");
+  };
+
+  const startBank = (config: QuizConfig) => {
+    setLastBankConfig(config);
     setRunDifficulty(config.difficulty === "Mixed" ? "Medium" : config.difficulty);
-    beginQuiz(selectQuestions(config), false);
+    beginQuiz(selectQuestions(config), "bank");
   };
 
   const openDashboard = () => {
@@ -102,16 +108,12 @@ export default function App() {
   };
 
   const startPractice = (rec: Recommendation) => {
-    // Dashboard practice targets the classic bank; fall back to All when the
-    // recommended (possibly AI-generated) topic has no bank questions.
-    const next: QuizConfig =
-      countBy(rec.topic, rec.difficulty) > 0
-        ? { topic: rec.topic, difficulty: rec.difficulty, count: rec.count }
-        : { topic: "All", difficulty: rec.difficulty, count: rec.count };
-    setConfig(next);
-    setRunDifficulty(next.difficulty === "Mixed" ? "Medium" : next.difficulty);
-    beginQuiz(selectQuestions(next), false);
+    const next: QuizConfig = { topic: rec.topic, difficulty: rec.difficulty, count: rec.count };
+    startBank(next);
   };
+
+  const quizHome: Screen =
+    flow === "resume" ? "profile" : flow === "quick" ? "quick" : "bank";
 
   return (
     <div className="min-h-screen bg-slate-50 text-slate-900">
@@ -141,22 +143,30 @@ export default function App() {
                 Prepare smarter. Interview better.
               </p>
               <p className="mx-auto mt-4 max-w-xl text-sm text-slate-600">
-                Upload your resume and get a personalized interview experience —
-                questions built around your background and your target role,
-                with AI feedback on every open answer.
+                Upload your resume for a fully personalized interview — or skip
+                it and practice by role or topic. Every open answer gets AI
+                feedback.
               </p>
-              <button
-                onClick={() => setScreen("upload")}
-                className="mt-6 rounded-xl bg-indigo-600 px-8 py-3 font-semibold text-white hover:bg-indigo-700"
-              >
-                Upload Resume
-              </button>
+              <div className="mt-6 flex flex-wrap justify-center gap-3">
+                <button
+                  onClick={() => setScreen("upload")}
+                  className="rounded-xl bg-indigo-600 px-8 py-3 font-semibold text-white hover:bg-indigo-700"
+                >
+                  Upload Resume
+                </button>
+                <button
+                  onClick={() => setScreen("quick")}
+                  className="rounded-xl border px-6 py-3 text-sm font-semibold hover:bg-slate-50"
+                >
+                  Skip resume — quick setup
+                </button>
+              </div>
               <p className="mt-4">
                 <button
                   onClick={() => setScreen("bank")}
                   className="text-xs font-semibold text-slate-500 hover:text-slate-700"
                 >
-                  Skip — try the classic question bank instead
+                  Or practice by topic from the question bank
                 </button>
               </p>
             </section>
@@ -196,106 +206,27 @@ export default function App() {
           </div>
         )}
 
+        {screen === "quick" && (
+          <QuickSetup
+            onDone={startQuick}
+            onBack={() => setScreen("home")}
+            onClassic={() => setScreen("bank")}
+          />
+        )}
+
         {screen === "bank" && (
-          <section className="rounded-2xl bg-white p-8 shadow-sm">
-            <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">
-              Classic Quiz
-            </p>
-            <h2 className="mt-1 text-2xl font-bold">Question bank practice</h2>
-            <p className="mt-1 text-sm text-slate-600">
-              No resume needed — fixed Finance/FP&A bank with instant feedback.
-            </p>
-
-            <div className="mt-6">
-              <Label>Topic</Label>
-              <div className="flex flex-wrap gap-2">
-                {TOPICS.map((t) => (
-                  <Option
-                    key={t}
-                    active={config.topic === t}
-                    onClick={() => setConfig({ ...config, topic: t as Topic | "All" })}
-                  >
-                    {t === "All" ? "All" : shortTopic(t as Topic)}
-                  </Option>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <Label>Difficulty</Label>
-              <div className="flex flex-wrap gap-2">
-                {DIFFICULTIES.map((d) => (
-                  <Option
-                    key={d}
-                    active={config.difficulty === d}
-                    onClick={() =>
-                      setConfig({ ...config, difficulty: d as Difficulty | "Mixed" })
-                    }
-                  >
-                    {d}
-                  </Option>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6">
-              <Label>Questions</Label>
-              <div className="flex gap-2">
-                {QUESTION_COUNTS.map((n) => (
-                  <Option
-                    key={n}
-                    active={config.count === n}
-                    onClick={() => setConfig({ ...config, count: n })}
-                  >
-                    {n}
-                  </Option>
-                ))}
-              </div>
-            </div>
-
-            <div className="mt-6 rounded-xl bg-slate-50 p-4 text-sm">
-              <p>
-                Available matching your filter: <strong>{available} questions</strong>
-              </p>
-              <p className="text-slate-500">
-                Topic: {config.topic} · Difficulty: {config.difficulty} · Requested:{" "}
-                {config.count}
-              </p>
-              {available === 0 && (
-                <p className="mt-1 font-medium text-red-600">
-                  No questions match — try “All” or “Mixed”.
-                </p>
-              )}
-              {available > 0 && available < config.count && (
-                <p className="mt-1 text-amber-700">
-                  Only {available} available — you’ll get all of them.
-                </p>
-              )}
-            </div>
-
-            <div className="mt-6 flex gap-3">
-              <button
-                onClick={() => setScreen("home")}
-                className="rounded-xl border px-5 py-3 text-sm font-semibold hover:bg-slate-50"
-              >
-                Back
-              </button>
-              <button
-                onClick={startBankQuiz}
-                disabled={available === 0}
-                className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-700 disabled:opacity-40"
-              >
-                Start Quiz
-              </button>
-            </div>
-          </section>
+          <BankSetup
+            onBankDone={startBank}
+            onTopicDone={startTopic}
+            onBack={() => setScreen("home")}
+          />
         )}
 
         {screen === "quiz" && (
           <QuizRunner
             key={runId}
             questions={picked}
-            onExit={() => setScreen(personalized ? "profile" : "bank")}
+            onExit={() => setScreen(quizHome)}
             onFinish={(a) => {
               setAnswers(a);
               setScreen("results");
@@ -312,12 +243,16 @@ export default function App() {
           <Results
             questions={picked}
             answers={answers}
-            config={config}
+            config={lastBankConfig || { topic: "All", difficulty: runDifficulty, count: picked.length }}
             difficulty={runDifficulty}
             role={personalized ? role : undefined}
             personalized={personalized}
-            onRetake={personalized ? () => setScreen("profile") : startBankQuiz}
-            onNewSetup={() => setScreen(personalized ? "profile" : "bank")}
+            onRetake={() => {
+              if (flow === "bank" && lastBankConfig) startBank(lastBankConfig);
+              else if (flow !== "bank") beginQuiz(picked, flow);
+              else setScreen("bank");
+            }}
+            onNewSetup={() => setScreen(quizHome)}
             onDashboard={openDashboard}
           />
         )}
@@ -336,12 +271,6 @@ export default function App() {
       </footer>
     </div>
   );
-}
-
-function shortTopic(t: Topic): string {
-  if (t === "Financial Accounting") return "Accounting";
-  if (t === "Excel / Financial Modeling") return "Excel";
-  return t;
 }
 
 /** Compact list of recent saved sessions on Home (plain history, no analytics). */
@@ -368,10 +297,6 @@ function RecentSessions() {
   );
 }
 
-function Label({ children }: { children: React.ReactNode }) {
-  return <p className="mb-2 text-sm font-semibold">{children}</p>;
-}
-
 function NavBtn({
   active,
   onClick,
@@ -388,29 +313,6 @@ function NavBtn({
         active
           ? "rounded-lg bg-slate-900 px-3 py-1.5 font-semibold text-white"
           : "rounded-lg px-3 py-1.5 text-slate-600 hover:bg-slate-100"
-      }
-    >
-      {children}
-    </button>
-  );
-}
-
-function Option({
-  active,
-  onClick,
-  children,
-}: {
-  active: boolean;
-  onClick: () => void;
-  children: React.ReactNode;
-}) {
-  return (
-    <button
-      onClick={onClick}
-      className={
-        active
-          ? "rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white"
-          : "rounded-xl border bg-white px-4 py-2 text-sm hover:bg-slate-50"
       }
     >
       {children}
