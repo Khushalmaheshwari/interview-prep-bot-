@@ -1,0 +1,16 @@
+# Render hosting config (free Web Service).
+# In Render: New → Web Service → connect your repo.
+# Root Directory: quiz-app (or leave empty if you push only quiz-app/).
+# Add GEMINI_API_KEY in the dashboard (Environment tab) — never commit it.
+services:
+  - type: web
+    name: fpa-quiz-bot
+    runtime: node
+    rootDir: quiz-app
+    buildCommand: npm install --include=dev && npm run build
+    startCommand: npm run start
+    envVars:
+      - key: GEMINI_MODEL
+        value: gemini-2.0-flash
+      - key: GEMINI_API_KEY
+        sync: false

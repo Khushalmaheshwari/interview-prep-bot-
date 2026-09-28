@@ -1,0 +1,493 @@
+[
+  {
+    "id": "ACC-E1",
+    "topic": "Financial Accounting",
+    "difficulty": "Easy",
+    "type": "mcq",
+    "question": "Which three statements make up the core financial statements?",
+    "options": [
+      "Balance Sheet, Income Statement, Cash Flow Statement",
+      "Balance Sheet, Trial Balance, General Ledger",
+      "Income Statement, Tax Return, Bank Statement",
+      "P&L, Budget, Forecast"
+    ],
+    "correct_answer": "Balance Sheet, Income Statement, Cash Flow Statement",
+    "explanation": "The three core statements are the Balance Sheet (position), Income Statement (performance), and Cash Flow Statement (cash movements). They link together.",
+    "interview_tip": "Be ready to explain how net income flows into retained earnings and cash flow."
+  },
+  {
+    "id": "ACC-E2",
+    "topic": "Financial Accounting",
+    "difficulty": "Easy",
+    "type": "true_false",
+    "question": "True or False: An increase in Accounts Receivable is a use of cash in operating cash flow.",
+    "options": ["True", "False"],
+    "correct_answer": "True",
+    "explanation": "Higher receivables mean revenue was booked but cash not yet collected, so operating cash flow is lower.",
+    "interview_tip": "Interviewers love working-capital questions — link receivables, payables and inventory to cash."
+  },
+  {
+    "id": "ACC-M1",
+    "topic": "Financial Accounting",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "A company buys equipment for $120,000 with a 6-year life and no salvage value (straight-line). What is annual depreciation?",
+    "options": ["$10,000", "$20,000", "$24,000", "$120,000"],
+    "correct_answer": "$20,000",
+    "explanation": "Straight-line depreciation = Cost / Useful life = 120,000 / 6 = $20,000 per year.",
+    "interview_tip": "Know straight-line vs declining balance and how depreciation affects all three statements."
+  },
+  {
+    "id": "ACC-M2",
+    "topic": "Financial Accounting",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "If revenue is recognised before cash is received, which account increases?",
+    "options": ["Accounts Payable", "Accounts Receivable", "Unearned Revenue", "Inventory"],
+    "correct_answer": "Accounts Receivable",
+    "explanation": "Accrued revenue creates a receivable: debit receivables, credit revenue under accrual accounting.",
+    "interview_tip": "Contrast this with deferred (unearned) revenue, where cash comes first."
+  },
+  {
+    "id": "ACC-H1",
+    "topic": "Financial Accounting",
+    "difficulty": "Hard",
+    "type": "mcq",
+    "question": "A company reports Net Income of $50m, Depreciation of $10m, increase in Receivables of $15m and increase in Payables of $5m. What is operating cash flow (simplified)?",
+    "options": ["$40m", "$50m", "$60m", "$80m"],
+    "correct_answer": "$50m",
+    "explanation": "OCF = 50 + 10 − 15 + 5 = $50m. Add back non-cash charges, subtract working-capital increases (receivables), add payables increases.",
+    "interview_tip": "Practice walking from Net Income to OCF out loud — it is a classic interview test."
+  },
+  {
+    "id": "FA-E1",
+    "topic": "Financial Analysis",
+    "difficulty": "Easy",
+    "type": "mcq",
+    "question": "What does EBITDA stand for?",
+    "options": [
+      "Earnings Before Interest, Taxes, Depreciation and Amortisation",
+      "Earnings Before Income, Transfers, Dividends and Assets",
+      "Equity Before Interest, Tax, Debt and Accruals",
+      "Earnings By Interest, Trade, Derivatives and Associates"
+    ],
+    "correct_answer": "Earnings Before Interest, Taxes, Depreciation and Amortisation",
+    "explanation": "EBITDA measures operating performance before financing, tax and non-cash charges.",
+    "interview_tip": "Be prepared to explain why EBITDA differs from EBIT and from operating cash flow."
+  },
+  {
+    "id": "FA-E2",
+    "topic": "Financial Analysis",
+    "difficulty": "Easy",
+    "type": "true_false",
+    "question": "True or False: Gross margin = (Revenue − COGS) / Revenue.",
+    "options": ["True", "False"],
+    "correct_answer": "True",
+    "explanation": "Gross margin shows what percent of revenue remains after direct costs.",
+    "interview_tip": "Know gross, EBITDA and net margin and what each reveals."
+  },
+  {
+    "id": "FA-M1",
+    "topic": "Financial Analysis",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "Revenue is $500m and EBITDA is $100m. What is the EBITDA margin?",
+    "options": ["5%", "10%", "20%", "50%"],
+    "correct_answer": "20%",
+    "explanation": "EBITDA margin = 100 / 500 = 20%.",
+    "interview_tip": "Always state the formula first, then the number — it shows structured thinking."
+  },
+  {
+    "id": "FA-M2",
+    "topic": "Financial Analysis",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "Which ratio best measures how efficiently a company uses shareholder capital?",
+    "options": ["Current Ratio", "Return on Equity (ROE)", "Debt-to-EBITDA", "Inventory Turnover"],
+    "correct_answer": "Return on Equity (ROE)",
+    "explanation": "ROE = Net Income / Average Equity. It can be decomposed with DuPont into margin, turnover and leverage.",
+    "interview_tip": "Mention DuPont decomposition to stand out for FP&A/analyst roles."
+  },
+  {
+    "id": "FA-H1",
+    "topic": "Financial Analysis",
+    "difficulty": "Hard",
+    "type": "mcq",
+    "question": "A company has Net Income $40m, Equity $200m, Assets $500m, Revenue $400m. What is its DuPont ROE driver for leverage (Assets/Equity)?",
+    "options": ["0.8x", "1.25x", "2.0x", "2.5x"],
+    "correct_answer": "2.5x",
+    "explanation": "Assets/Equity = 500/200 = 2.5x. ROE = (40/400) × (400/500) × (500/200) = 10% × 0.8 × 2.5 = 20%.",
+    "interview_tip": "If asked about high ROE, check whether it comes from performance or just leverage."
+  },
+  {
+    "id": "CF-E1",
+    "topic": "Corporate Finance",
+    "difficulty": "Easy",
+    "type": "mcq",
+    "question": "What does NPV measure?",
+    "options": [
+      "The present value of future cash flows minus the initial investment",
+      "Total undiscounted profit of a project",
+      "The interest rate that makes NPV zero",
+      "Book value of equity"
+    ],
+    "correct_answer": "The present value of future cash flows minus the initial investment",
+    "explanation": "NPV discounts future cash flows at the cost of capital. NPV > 0 creates value.",
+    "interview_tip": "State the decision rule: accept if NPV > 0 when discounted at WACC."
+  },
+  {
+    "id": "CF-E2",
+    "topic": "Corporate Finance",
+    "difficulty": "Easy",
+    "type": "true_false",
+    "question": "True or False: A higher discount rate lowers the present value of future cash flows.",
+    "options": ["True", "False"],
+    "correct_answer": "True",
+    "explanation": "Present value = CF / (1+r)^t, so a higher r reduces PV.",
+    "interview_tip": "Link this to why growth stocks fall when rates rise."
+  },
+  {
+    "id": "CF-M1",
+    "topic": "Corporate Finance",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "What is IRR?",
+    "options": [
+      "The discount rate at which NPV equals zero",
+      "The risk-free rate plus inflation",
+      "Average accounting return",
+      "Cost of debt after tax"
+    ],
+    "correct_answer": "The discount rate at which NPV equals zero",
+    "explanation": "IRR is the break-even discount rate. Accept if IRR > cost of capital (for standard projects).",
+    "interview_tip": "Mention IRR pitfalls: multiple IRRs with alternating cash flows, and scale problems — NPV is king."
+  },
+  {
+    "id": "CF-M2",
+    "topic": "Corporate Finance",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "Which best describes WACC?",
+    "options": [
+      "Weighted average of cost of equity and after-tax cost of debt",
+      "Simple average of all interest rates",
+      "Cost of equity only",
+      "Total debt divided by total assets"
+    ],
+    "correct_answer": "Weighted average of cost of equity and after-tax cost of debt",
+    "explanation": "WACC = (E/V)×Re + (D/V)×Rd×(1−Tax). It is the blended hurdle rate for firm cash flows.",
+    "interview_tip": "Be ready to list inputs: risk-free rate, beta, market premium, cost of debt, target weights."
+  },
+  {
+    "id": "CF-H1",
+    "topic": "Corporate Finance",
+    "difficulty": "Hard",
+    "type": "mcq",
+    "question": "A project costs $100 today and returns $60 in Year 1 and $60 in Year 2. At a 10% discount rate, what is the approximate NPV?",
+    "options": ["$4.1", "$9.1", "$14.1", "$20.0"],
+    "correct_answer": "$4.1",
+    "explanation": "PV = 60/1.1 + 60/1.21 = 54.55 + 49.59 = 104.13. NPV = 104.13 − 100 ≈ $4.1.",
+    "interview_tip": "Show your maths step by step; interviewers check process, not just the answer."
+  },
+  {
+    "id": "FPA-E1",
+    "topic": "FP&A",
+    "difficulty": "Easy",
+    "type": "mcq",
+    "question": "What does a Budget vs Actual (BvA) variance analysis primarily explain?",
+    "options": [
+      "Why actual results differed from plan",
+      "The audit opinion on financials",
+      "The share price movement",
+      "Tax compliance status"
+    ],
+    "correct_answer": "Why actual results differed from plan",
+    "explanation": "BvA compares actuals to budget to identify volume, price, mix and timing drivers.",
+    "interview_tip": "Structure variances as Price × Volume, and flag one-offs vs run-rate."
+  },
+  {
+    "id": "FPA-E2",
+    "topic": "FP&A",
+    "difficulty": "Easy",
+    "type": "true_false",
+    "question": "True or False: A favourable revenue variance means actual revenue was higher than budget.",
+    "options": ["True", "False"],
+    "correct_answer": "True",
+    "explanation": "For revenue, actual > budget is favourable; for costs, actual < budget is favourable.",
+    "interview_tip": "Clarify favourable vs unfavourable separately for revenue and cost lines."
+  },
+  {
+    "id": "FPA-M1",
+    "topic": "FP&A",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "Actual revenue is $1,050k vs budget $1,000k, and actual units are 105 vs 100 budgeted. How much of the $50k variance is volume vs price?",
+    "options": [
+      "Volume $50k, Price $0k",
+      "Volume $25k, Price $25k",
+      "Volume $0k, Price $50k",
+      "Volume $100k, Price −$50k"
+    ],
+    "correct_answer": "Volume $50k, Price $0k",
+    "explanation": "Budget price = 1,000/100 = $10k per unit. Volume variance = (105−100)×10 = $50k. Actual price = 1,050/105 = $10k, so price variance is $0k.",
+    "interview_tip": "Always isolate volume first using budgeted price — a clean FP&A habit."
+  },
+  {
+    "id": "FPA-M2",
+    "topic": "FP&A",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "Which is the best first step in building a rolling forecast?",
+    "options": [
+      "Identify key business drivers and their owners",
+      "Freeze all assumptions for 12 months",
+      "Copy last year's budget exactly",
+      "Forecast only the P&L, ignoring cash"
+    ],
+    "correct_answer": "Identify key business drivers and their owners",
+    "explanation": "Driver-based forecasting (volume, pricing, headcount) with clear owners makes forecasts actionable and updateable.",
+    "interview_tip": "Mention cadence (monthly/quarterly), horizon (4+ quarters) and variance review."
+  },
+  {
+    "id": "FPA-M3",
+    "topic": "FP&A",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "A cost centre spent $105k against a flexible budget of $100k for the actual activity level. What is the variance?",
+    "options": [
+      "$5k unfavourable",
+      "$5k favourable",
+      "No variance",
+      "Cannot tell without last year's actuals"
+    ],
+    "correct_answer": "$5k unfavourable",
+    "explanation": "For costs, actual above the flexed budget is unfavourable. Flexing first isolates cost control from volume effects.",
+    "interview_tip": "Say it in two steps: flex the budget to actual volume, then compare — interviewers listen for that order."
+  },
+  {
+    "id": "FPA-S2",
+    "topic": "FP&A",
+    "difficulty": "Medium",
+    "type": "scenario",
+    "question": "Your revenue forecast missed actuals by about 20% two quarters in a row. How do you respond?",
+    "ideal_answer": "Treat it as a process problem, not bad luck: diagnose bias by driver (pipeline conversion, win rates, timing/pull-forwards), separate one-offs from run-rate, move to driver-based rolling reforecasts with owners, and track accuracy (bias and MAPE) each cycle so the next forecast visibly improves.",
+    "evaluation_points": [
+      "Diagnoses root cause / bias by driver rather than blaming luck",
+      "Proposes measuring accuracy (bias, MAPE) or driver-based reforecast",
+      "Suggests a process fix: cadence, owners or one-off separation"
+    ],
+    "interview_tip": "Never answer 'forecast better' — describe the feedback loop that makes it better."
+  },
+  {
+    "id": "FPA-H1",
+    "topic": "FP&A",
+    "difficulty": "Hard",
+    "type": "mcq",
+    "question": "Revenue grew 12% but EBITDA fell 3%. Which is the most likely explanation FP&A should investigate first?",
+    "options": [
+      "Unfavourable mix shift toward low-margin products plus cost inflation",
+      "A decrease in depreciation",
+      "Lower tax rate",
+      "Share buyback"
+    ],
+    "correct_answer": "Unfavourable mix shift toward low-margin products plus cost inflation",
+    "explanation": "Top-line growth with margin contraction usually points to mix, pricing pressure or opex growing faster than sales — not to below-EBITDA items like D&A or tax.",
+    "interview_tip": "Answer with a bridge: Volume/Mix/Price on revenue, then headcount, marketing and one-offs on cost."
+  },
+  {
+    "id": "EXC-E1",
+    "topic": "Excel / Financial Modeling",
+    "difficulty": "Easy",
+    "type": "mcq",
+    "question": "Which function sums values only when multiple conditions are met?",
+    "options": ["SUM", "SUMIF", "SUMIFS", "VLOOKUP"],
+    "correct_answer": "SUMIFS",
+    "explanation": "SUMIFS(sum_range, criteria_range1, criteria1, ...) handles multiple conditions; SUMIF handles one.",
+    "interview_tip": "Be ready to write =SUMIFS() live and explain each argument."
+  },
+  {
+    "id": "EXC-E2",
+    "topic": "Excel / Financial Modeling",
+    "difficulty": "Easy",
+    "type": "true_false",
+    "question": "True or False: XLOOKUP can search both to the left and right, unlike classic VLOOKUP.",
+    "options": ["True", "False"],
+    "correct_answer": "True",
+    "explanation": "XLOOKUP defaults to exact match and works in any direction, with built-in error handling.",
+    "interview_tip": "Mention you use XLOOKUP or INDEX+MATCH over VLOOKUP in new models."
+  },
+  {
+    "id": "EXC-M1",
+    "topic": "Excel / Financial Modeling",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "What is the main purpose of a PivotTable?",
+    "options": [
+      "To quickly summarise and slice large datasets by categories",
+      "To run Monte Carlo simulations",
+      "To format financial statements for printing",
+      "To replace the general ledger"
+    ],
+    "correct_answer": "To quickly summarise and slice large datasets by categories",
+    "explanation": "PivotTables aggregate (sum, count, average) by rows/columns/filters without formulas.",
+    "interview_tip": "Cite a real example: monthly actuals by cost centre from a GL dump."
+  },
+  {
+    "id": "EXC-M2",
+    "topic": "Excel / Financial Modeling",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "Which is a financial-modeling best practice?",
+    "options": [
+      "Hard-code assumptions inside formulas across sheets",
+      "Separate inputs, calculations and outputs; one formula per row; clear units",
+      "Merge all cells for readability",
+      "Use circular references freely"
+    ],
+    "correct_answer": "Separate inputs, calculations and outputs; one formula per row; clear units",
+    "explanation": "Consistent structure, blue inputs, no hard-coding in formulas, and balance checks make models auditable.",
+    "interview_tip": "Mention checks: Balance Sheet balances, Cash ties to Cash Flow, and error flags."
+  },
+  {
+    "id": "EXC-H1",
+    "topic": "Excel / Financial Modeling",
+    "difficulty": "Hard",
+    "type": "mcq",
+    "question": "You need the revenue for Product X in Region North for March from a large table. Which approach is most robust?",
+    "options": [
+      "VLOOKUP on product name only",
+      "SUMIFS with product, region and month criteria",
+      "Manual filter and copy-paste",
+      "HLOOKUP on the total row"
+    ],
+    "correct_answer": "SUMIFS with product, region and month criteria",
+    "explanation": "SUMIFS enforces all three dimensions explicitly and updates dynamically, unlike single-key lookups or manual steps.",
+    "interview_tip": "Discuss handling duplicates, date formats and using structured tables/named ranges."
+  },
+  {
+    "id": "BC-M1",
+    "topic": "Business Cases",
+    "difficulty": "Medium",
+    "type": "mcq",
+    "question": "Revenue declined 8% YoY while market volume was flat. What should you check first?",
+    "options": [
+      "Price and mix: realised price, discounts, product/customer mix and churn",
+      "The depreciation policy",
+      "The statutory tax rate",
+      "FX translation of goodwill"
+    ],
+    "correct_answer": "Price and mix: realised price, discounts, product/customer mix and churn",
+    "explanation": "With flat market volume, the decline is company-specific: pricing, discounting, lost accounts or shift to cheaper SKUs.",
+    "interview_tip": "Structure case answers: Market → Volume → Price/Mix → One-offs."
+  },
+  {
+    "id": "BC-H1",
+    "topic": "Business Cases",
+    "difficulty": "Hard",
+    "type": "mcq",
+    "question": "Gross margin fell 400bps despite stable revenue. Which driver is most plausible?",
+    "options": [
+      "Higher input costs not passed through plus shift to lower-margin SKUs",
+      "Lower interest expense",
+      "Change in auditor",
+      "Fewer shares outstanding"
+    ],
+    "correct_answer": "Higher input costs not passed through plus shift to lower-margin SKUs",
+    "explanation": "Gross margin = (Revenue−COGS)/Revenue. COGS inflation or adverse mix directly compresses it; financing items sit below gross profit.",
+    "interview_tip": "Quantify: split the 400bps into rate (cost) vs mix effects."
+  },
+  {
+    "id": "BC-E1",
+    "topic": "Business Cases",
+    "difficulty": "Easy",
+    "type": "true_false",
+    "question": "True or False: Rising inventory days (DIO) without sales growth can signal overstocking or weak demand.",
+    "options": ["True", "False"],
+    "correct_answer": "True",
+    "explanation": "DIO = Inventory / COGS × 365. If it rises while sales stall, cash is trapped in stock.",
+    "interview_tip": "Link DIO, DSO and DPO into the cash conversion cycle."
+  },
+  {
+    "id": "ACC-S1",
+    "topic": "Financial Accounting",
+    "difficulty": "Medium",
+    "type": "scenario",
+    "question": "A retailer reports rising net income but negative operating cash flow for two years. What could explain this, and what would you check?",
+    "ideal_answer": "Aggressive accruals or working-capital build: receivables growing faster than sales (channel stuffing / lax collections), inventory piling up, or payables shrinking. Also large non-cash gains. Check cash conversion cycle, receivables ageing, inventory turnover, and reconcile net income to OCF.",
+    "evaluation_points": [
+      "Mentions receivables / collections or revenue quality",
+      "Mentions inventory build-up or payables timing",
+      "Suggests checking OCF reconciliation / cash conversion cycle"
+    ],
+    "interview_tip": "Always say: profit is an opinion, cash is a fact — then walk the bridge."
+  },
+  {
+    "id": "FPA-S1",
+    "topic": "FP&A",
+    "difficulty": "Medium",
+    "type": "scenario",
+    "question": "Revenue is up 10% but EBITDA is down 5%. Explain to a hiring manager what likely happened and how you would analyse it.",
+    "ideal_answer": "Costs grew faster than sales or mix shifted to lower-margin business. I would build a bridge: volume/mix/price on revenue, then walk headcount, variable costs, marketing and one-offs on opex, separating run-rate from one-time items.",
+    "evaluation_points": [
+      "Identifies cost growth outpacing sales or adverse mix",
+      "Mentions variance bridge (volume / mix / price)",
+      "Separates one-offs from run-rate costs"
+    ],
+    "interview_tip": "Use plain business language first, then offer the numbers."
+  },
+  {
+    "id": "CF-S1",
+    "topic": "Corporate Finance",
+    "difficulty": "Hard",
+    "type": "scenario",
+    "question": "Two projects both cost $100k. Project A returns $120k in Year 1. Project B returns $30k per year for 5 years. Discount rate is 10%. Which creates more value and why?",
+    "ideal_answer": "Compute NPV. A: 120/1.1 − 100 ≈ +$9.1k. B: 30 × annuity factor 3.791 − 100 ≈ +$13.7k. Project B has higher NPV despite slower payback, so B creates more value. Payback ignores time value and later cash flows.",
+    "evaluation_points": [
+      "Uses NPV / time value of money (not just payback)",
+      "Concludes B has higher NPV (~$13.7k vs ~$9.1k)",
+      "Notes payback ignores discounting / later flows"
+    ],
+    "interview_tip": "State assumptions and show quick maths even if approximate."
+  },
+  {
+    "id": "BC-S1",
+    "topic": "Business Cases",
+    "difficulty": "Hard",
+    "type": "scenario",
+    "question": "A SaaS company shows strong revenue growth but shrinking gross margin and rising DSO. Diagnose the problem and propose next steps.",
+    "ideal_answer": "Likely discounting / selling lower-margin tiers or services-heavy deals to hit growth, plus lax collections. Next: cohort/mix analysis by plan and channel, discount audit, CAC payback, ageing review, and tighten credit/dunning while protecting good logos.",
+    "evaluation_points": [
+      "Links margin pressure to discounting / mix / services drag",
+      "Links DSO to collections / deal terms",
+      "Proposes concrete analysis: cohort, ageing, discount audit"
+    ],
+    "interview_tip": "End with 2-3 prioritised actions, not a laundry list."
+  },
+  {
+    "id": "EXC-S1",
+    "topic": "Excel / Financial Modeling",
+    "difficulty": "Easy",
+    "type": "scenario",
+    "question": "Your manager asks for monthly spend by department from a 50,000-row export. How would you do it quickly and repeatably in Excel?",
+    "ideal_answer": "Clean dates/amounts into a table, use a PivotTable with months in rows/columns and departments as rows summing spend, or SUMIFS by month and department. Keep raw data untouched and document steps so next month is a refresh.",
+    "evaluation_points": [
+      "Mentions PivotTable or SUMIFS with month + department",
+      "Keeps raw data separate / uses tables",
+      "Makes it repeatable (refreshable)"
+    ],
+    "interview_tip": "Mention checking totals back to the source export."
+  },
+  {
+    "id": "FA-S1",
+    "topic": "Financial Analysis",
+    "difficulty": "Easy",
+    "type": "scenario",
+    "question": "Revenue grew 15% but operating cash flow fell. Give two plausible reasons.",
+    "ideal_answer": "Working capital absorbed cash — e.g. receivables grew with loose credit, or inventory was built ahead of demand — and/or large upfront cash costs. Non-cash revenue or timing of payables can also drive the gap.",
+    "evaluation_points": [
+      "Mentions receivables / collections timing",
+      "Mentions inventory build or payables timing"
+    ],
+    "interview_tip": "Pick two drivers and explain the cash mechanics of each."
+  }
+]
