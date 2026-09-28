@@ -27,7 +27,7 @@ single demo user, resume processed in-session only.
 - React 19 + TypeScript + Tailwind CSS v4 (Vite 8)
 - Minimal Express backend (`server/`) — holds the Gemini key server-side and
   exposes `/api/resume/analyze`, `/api/interview/generate`, `/api/evaluate`
-- Gemini API (`generateContent`, default `gemini-2.5-flash`)
+- Gemini API (`generateContent`, default `gemini-3.8-flash`)
 - PDF text extraction with `unpdf`; history in `localStorage`
 
 ## Install / run
@@ -55,7 +55,7 @@ npm run start    # serves dist/ + API on PORT (default 3001)
 
 1. Create a key at https://aistudio.google.com (free tier available).
 2. Copy `.env.example` to `.env` inside `quiz-app/`.
-3. Set `GEMINI_API_KEY=...` (optional: `GEMINI_MODEL=gemini-2.5-flash`, `PORT=3001`).
+3. Set `GEMINI_API_KEY=...` (optional: `GEMINI_MODEL=gemini-3.8-flash`, `PORT=3001`).
 4. Restart `npm run server`.
 
 The key is read only by `server/*.js` and never reaches the browser.

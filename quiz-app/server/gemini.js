@@ -3,7 +3,7 @@
  * (GEMINI_API_KEY) never leaves the server.
  *
  * Endpoint: POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent
- * Model: GEMINI_MODEL env, default "gemini-2.5-flash".
+ * Model: GEMINI_MODEL env, default "gemini-3.8-flash".
  */
 
 /**
@@ -18,7 +18,7 @@
 export async function geminiChat({ system, user, maxTokens = 1200, temperature = 0.2, timeoutMs = 60000 }) {
   const key = process.env.GEMINI_API_KEY || "";
   if (!key) return { ok: false, reason: "not_configured" };
-  const model = process.env.GEMINI_MODEL || "gemini-2.5-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
 
   const controller = new AbortController();
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
