@@ -42,7 +42,7 @@ AI-generated personalized interview → Gemini feedback → results + dashboard.
 
 1. **Model/API.** Google Gemini via REST `generateContent`
    (`https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`),
-   default model `gemini-3.8-flash` (overridable with `GEMINI_MODEL`).
+   default model `gemini-3.6-flash` (overridable with `GEMINI_MODEL`).
 2. **Why this one.** Accessible key with a free tier (AI Studio), fast
    flash-tier latency for per-answer grading, good instruction-following for
    strict JSON output, single text endpoint for all three AI jobs, plain

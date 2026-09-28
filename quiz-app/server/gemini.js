@@ -3,7 +3,7 @@
  * (GEMINI_API_KEY) never leaves the server.
  *
  * Endpoint: POST https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent
- * Model: GEMINI_MODEL env, default "gemini-3.8-flash".
+ * Model: GEMINI_MODEL env, default "gemini-3.6-flash".
  */
 
 /**
@@ -18,37 +18,48 @@
 export async function geminiChat({ system, user, maxTokens = 1200, temperature = 0.2, timeoutMs = 60000 }) {
   const key = process.env.GEMINI_API_KEY || "";
   if (!key) return { ok: false, reason: "not_configured" };
-  const model = process.env.GEMINI_MODEL || "gemini-3.8-flash";
+  const model = process.env.GEMINI_MODEL || "gemini-3.6-flash";
+  const url =
+    `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}` +
+    `:generateContent?key=${encodeURIComponent(key)}`;
+  const body = JSON.stringify({
+    system_instruction: { parts: [{ text: system }] },
+    contents: [{ role: "user", parts: [{ text: user }] }],
+    generationConfig: { temperature, maxOutputTokens: maxTokens },
+  });
 
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(model)}` +
-      `:generateContent?key=${encodeURIComponent(key)}`;
-    const response = await fetch(url, {
-      method: "POST",
-      signal: controller.signal,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: system }] },
-        contents: [{ role: "user", parts: [{ text: user }] }],
-        generationConfig: { temperature, maxOutputTokens: maxTokens },
-      }),
-    });
-    if (!response.ok) {
-      console.error("Gemini API error:", response.status, await response.text().catch(() => ""));
+  // One automatic retry on 503: free-tier capacity flaps, and a second
+  // attempt seconds later often succeeds.
+  for (let attempt = 1; attempt <= 2; attempt++) {
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(url, {
+        method: "POST",
+        signal: controller.signal,
+        headers: { "Content-Type": "application/json" },
+        body,
+      });
+      if (response.status === 503 && attempt === 1) {
+        console.warn("Gemini 503 — retrying once in 8s…");
+        await new Promise((r) => setTimeout(r, 8000));
+        continue;
+      }
+      if (!response.ok) {
+        console.error("Gemini API error:", response.status, await response.text().catch(() => ""));
+        return { ok: false, reason: "api_error" };
+      }
+      const data = await response.json();
+      const text =
+        data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
+      if (!text.trim()) return { ok: false, reason: "bad_output" };
+      return { ok: true, text };
+    } catch (err) {
+      console.error("Gemini request failed:", err?.message || err);
       return { ok: false, reason: "api_error" };
+    } finally {
+      clearTimeout(timeout);
     }
-    const data = await response.json();
-    const text =
-      data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
-    if (!text.trim()) return { ok: false, reason: "bad_output" };
-    return { ok: true, text };
-  } catch (err) {
-    console.error("Gemini request failed:", err?.message || err);
-    return { ok: false, reason: "api_error" };
-  } finally {
-    clearTimeout(timeout);
   }
+  return { ok: false, reason: "api_error" };
 }
