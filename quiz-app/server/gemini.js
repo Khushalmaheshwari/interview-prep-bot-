@@ -41,6 +41,12 @@ export async function geminiChat({ system, user, maxTokens = 1200, temperature =
         headers: { "Content-Type": "application/json" },
         body,
       });
+      if (response.status === 429) {
+        // Quota exhausted: retrying only burns more quota. Surface it so the
+        // UI can suggest tomorrow or the offline bank.
+        console.error("Gemini quota exhausted:", await response.text().catch(() => ""));
+        return { ok: false, reason: "quota" };
+      }
       if (response.status === 503 && attempt < 3) {
         const wait = waits[attempt - 1];
         console.warn(`Gemini 503 — retrying in ${wait / 1000}s…`);

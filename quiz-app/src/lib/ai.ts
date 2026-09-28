@@ -121,7 +121,8 @@ export function friendlyError(reason: string): string {
     case "bad_output":
     case "network":
       return "AI service is temporarily unavailable. Please try again.";
-    case "unreadable":
+    case "quota":
+      return "Today's free AI limit is reached. Please try again tomorrow, or use the classic bank below.";    case "unreadable":
     case "not_a_pdf":
       return "Unable to read this resume. Please upload a text-based PDF.";
     case "file_too_large":
