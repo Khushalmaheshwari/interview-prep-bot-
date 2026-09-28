@@ -19,8 +19,8 @@ export type EvaluateResult =
   | { ok: false; reason: string };
 
 /**
- * Ask the backend proxy to evaluate one open-ended answer with Grok.
- * The XAI key lives server-side; the browser never sees it.
+ * Ask the backend proxy to evaluate one open-ended answer with Gemini.
+ * The Gemini key lives server-side; the browser never sees it.
  * Any failure resolves to ok:false so the quiz keeps working (fallback UI).
  */
 export async function evaluateAnswer(input: EvaluateInput): Promise<EvaluateResult> {
@@ -44,7 +44,7 @@ export type AnalyzeResult =
   | { ok: true; profile: CandidateProfile; resumeExcerpt: string; fileName: string }
   | { ok: false; reason: string };
 
-/** Upload a resume PDF (base64) for Grok analysis. Session-only, never stored. */
+/** Upload a resume PDF (base64) for Gemini analysis. Session-only, never stored. */
 export async function analyzeResume(pdfBase64: string, fileName: string): Promise<AnalyzeResult> {
   try {
     const res = await fetch("/api/resume/analyze", {

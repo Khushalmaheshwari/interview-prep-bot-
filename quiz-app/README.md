@@ -1,7 +1,7 @@
 # AI Interview Prep — Personalized Interview Practice
 
 Upload your resume, pick any target role, and get an AI-generated mock
-interview built around your background — with Grok feedback on every open
+interview built around your background — with Gemini feedback on every open
 answer. A classic Finance question bank is included as an offline fallback.
 
 MBA end-term demonstration project — deliberately simple: no auth, no database,
@@ -9,13 +9,13 @@ single demo user, resume processed in-session only.
 
 ## Main features
 
-- Resume upload (text-based PDF, ≤ 5 MB) → Grok candidate profile: strengths,
+- Resume upload (text-based PDF, ≤ 5 MB) → Gemini candidate profile: strengths,
   (hedged) potential improvement areas, skills, experience, likely interview angles
 - Any target role: preset list (Analyst, Marketing, Product, Consulting,
   Engineering, HR, Sales, Operations…) + free-text "Other"
 - Personalized AI interviews: technical, resume-based, behavioral, situational
   and scenario questions generated per candidate, role and difficulty
-- Instant deterministic feedback on MCQ/True-False; Grok evaluation of
+- Instant deterministic feedback on MCQ/True-False; Gemini evaluation of
   open answers (score, verdict, strengths, gaps, stronger example, tip)
 - Results with per-question review + performance dashboard (averages, topic
   stats, weakest area, rule-based practice recommendation, history)
@@ -25,9 +25,9 @@ single demo user, resume processed in-session only.
 ## Tech stack
 
 - React 19 + TypeScript + Tailwind CSS v4 (Vite 8)
-- Minimal Express backend (`server/`) — holds the Grok key server-side and
+- Minimal Express backend (`server/`) — holds the Gemini key server-side and
   exposes `/api/resume/analyze`, `/api/interview/generate`, `/api/evaluate`
-- Grok API (`POST https://api.x.ai/v1/chat/completions`, default `grok-4.6`)
+- Gemini API (`generateContent`, default `gemini-2.5-flash`)
 - PDF text extraction with `unpdf`; history in `localStorage`
 
 ## Install / run
@@ -51,11 +51,11 @@ npm run build
 npm run start    # serves dist/ + API on PORT (default 3001)
 ```
 
-## Grok API key
+## Gemini API key
 
-1. Create a key at https://console.x.ai (API usage is billed per token).
+1. Create a key at https://aistudio.google.com (free tier available).
 2. Copy `.env.example` to `.env` inside `quiz-app/`.
-3. Set `XAI_API_KEY=xai-...` (optional: `GROK_MODEL=grok-4.6`, `PORT=3001`).
+3. Set `GEMINI_API_KEY=...` (optional: `GEMINI_MODEL=gemini-2.5-flash`, `PORT=3001`).
 4. Restart `npm run server`.
 
 The key is read only by `server/*.js` and never reaches the browser.
@@ -87,8 +87,8 @@ quiz-app/
     App.tsx                        # Home / Upload / Profile / Bank / Quiz / Results / Performance
   server/
     index.js                       # Express API + static hosting
-    grok.js                        # xAI chat-completions helper
-    prompt.js                      # Grok prompts + strict JSON parsers
+    gemini.js                      # Gemini generateContent helper
+    prompt.js                      # Gemini prompts + strict JSON parsers
   .env.example
 ```
 
@@ -96,7 +96,7 @@ Docs for the evaluation: `../PROJECT_REPORT.md`, `../DEMO_SCRIPT.md`.
 
 ## Important limitations
 
-- Grok API needs credits on your x.ai account; without them AI features fall back.
+- Gemini API needs a key (free tier at AI Studio); without one AI features fall back.
 - AI scores and generated questions are advisory — verify against model answers.
 - Only text-based PDFs can be read (scanned/image PDFs are rejected).
 - History lives in one browser's `localStorage` (max 50 sessions).

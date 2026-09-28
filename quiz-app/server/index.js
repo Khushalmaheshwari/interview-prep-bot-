@@ -1,11 +1,11 @@
 /**
- * Minimal backend — Grok AI proxy + resume processing + static hosting.
+ * Minimal backend — Gemini AI proxy + resume processing + static hosting.
  *
- * Why a backend exists: the Grok API key (XAI_API_KEY) must NOT be exposed in
+ * Why a backend exists: the Gemini API key (GEMINI_API_KEY) must NOT be exposed in
  * frontend code. The server holds it in an environment variable and exposes:
  *   POST /api/resume/analyze      PDF -> candidate profile
  *   POST /api/interview/generate   profile + role -> personalized questions
- *   POST /api/evaluate             open-ended answer -> Grok evaluation
+ *   POST /api/evaluate             open-ended answer -> Gemini evaluation
  *   GET  /api/health               { ok, aiConfigured, provider }
  *
  * Resumes are processed in memory for the current session only — never stored.
@@ -22,7 +22,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import { extractText } from "unpdf";
-import { grokChat } from "./grok.js";
+import { geminiChat } from "./gemini.js";
 import {
   EVAL_SYSTEM,
   INTERVIEW_SYSTEM,
@@ -38,13 +38,13 @@ import {
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = Number(process.env.PORT || 3001);
-const aiConfigured = () => Boolean(process.env.XAI_API_KEY);
+const aiConfigured = () => Boolean(process.env.GEMINI_API_KEY);
 
 // 10mb: resumes arrive as base64 inside JSON (no multipart needed).
 app.use(express.json({ limit: "10mb" }));
 
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, provider: "grok", aiConfigured: aiConfigured() });
+  res.json({ ok: true, provider: "gemini", aiConfigured: aiConfigured() });
 });
 
 // ------------------------------------------------------- resume analyze ---
@@ -75,7 +75,7 @@ app.post("/api/resume/analyze", async (req, res) => {
     return res.status(400).json({ ok: false, reason: "unreadable" });
   }
 
-  const result = await grokChat({
+  const result = await geminiChat({
     system: RESUME_SYSTEM,
     user: buildResumeMessage(text.slice(0, 12000)),
     maxTokens: 900,
@@ -83,7 +83,7 @@ app.post("/api/resume/analyze", async (req, res) => {
   if (!result.ok) return res.json(result);
   const profile = parseProfile(result.text);
   if (!profile) {
-    console.error("Grok returned unparseable profile:", result.text.slice(0, 300));
+    console.error("Gemini returned unparseable profile:", result.text.slice(0, 300));
     return res.json({ ok: false, reason: "bad_output" });
   }
   // Keep a short excerpt so later calls stay grounded without resending all.
@@ -110,7 +110,7 @@ app.post("/api/interview/generate", async (req, res) => {
   const n = Math.min(10, Math.max(3, Number(count) || 5));
   if (!aiConfigured()) return res.json({ ok: false, reason: "not_configured" });
 
-  const result = await grokChat({
+  const result = await geminiChat({
     system: INTERVIEW_SYSTEM,
     user: buildInterviewMessage({
       profile,
@@ -125,7 +125,7 @@ app.post("/api/interview/generate", async (req, res) => {
   if (!result.ok) return res.json(result);
   const questions = parseInterviewQuestions(result.text, n, diff);
   if (!questions) {
-    console.error("Grok returned unparseable questions:", result.text.slice(0, 300));
+    console.error("Gemini returned unparseable questions:", result.text.slice(0, 300));
     return res.json({ ok: false, reason: "bad_output" });
   }
   // Re-id sequentially after validation drops.
@@ -150,7 +150,7 @@ app.post("/api/evaluate", async (req, res) => {
   }
   if (!aiConfigured()) return res.json({ ok: false, reason: "not_configured" });
 
-  const result = await grokChat({
+  const result = await geminiChat({
     system: EVAL_SYSTEM,
     user: buildEvalMessage({
       question,
@@ -165,7 +165,7 @@ app.post("/api/evaluate", async (req, res) => {
   if (!result.ok) return res.json(result);
   const evaluation = parseEvaluation(result.text);
   if (!evaluation) {
-    console.error("Grok returned unparseable evaluation:", result.text.slice(0, 300));
+    console.error("Gemini returned unparseable evaluation:", result.text.slice(0, 300));
     return res.json({ ok: false, reason: "bad_output" });
   }
   return res.json({ ok: true, evaluation });
@@ -184,6 +184,6 @@ if (fs.existsSync(distDir)) {
 
 app.listen(PORT, () => {
   console.log(
-    `Interview server on http://localhost:${PORT} (Grok ${aiConfigured() ? "configured" : "NOT configured — fallback mode"})`
+    `Interview server on http://localhost:${PORT} (Gemini ${aiConfigured() ? "configured" : "NOT configured — fallback mode"})`
   );
 });

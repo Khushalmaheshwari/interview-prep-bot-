@@ -1,7 +1,7 @@
 # Demo Script — 3–5 Minute Demonstration
 
 Setup before the audience arrives: `npm run server` (terminal 1),
-`npm run dev` (terminal 2), browser on the app. Grok key in `quiz-app/.env`
+`npm run dev` (terminal 2), browser on the app. Gemini key in `quiz-app/.env`
 for the live path. Have a 1–2 page text-based PDF resume ready (your own or a
 sample). Without a key, show the fallback line at step 4 and continue with the
 classic bank.
@@ -15,8 +15,8 @@ classic bank.
 | 5 | Click **Start Interview**. | "Questions are generated per candidate — resume-based, technical, behavioral, scenario." |
 | 6 | Point at a resume-specific question. | "This one exists because of a line on the resume — that is the personalization." |
 | 7 | Answer an MCQ → submit → instant Correct/Incorrect + explanation. | "Objective checking is deterministic — no AI wasted where the key is known." |
-| 8 | Answer an open question in 2–3 sentences → submit. | "Now Grok judges what only interpretation can grade." |
-| 9 | Show Grok evaluation: score, verdict, strengths, gaps, stronger example. | "Score plus a better answer to learn from — grounded in the resume, with the model answer below for checking." |
+| 8 | Answer an open question in 2–3 sentences → submit. | "Now Gemini judges what only interpretation can grade." |
+| 9 | Show Gemini evaluation: score, verdict, strengths, gaps, stronger example. | "Score plus a better answer to learn from — grounded in the resume, with the model answer below for checking." |
 | 10 | Finish, **See Results** → score + review. | "Headline score stays objective-only; open answers carry their own AI scores." |
 | 11 | Open **Performance** → previous result, topic bars, weakest area, recommendation. | "Simple arithmetic, no black box — and one click turns the diagnosis into the next drill." |
 

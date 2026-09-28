@@ -1,12 +1,25 @@
 /**
- * Grok prompts + strict parsers for the personalized interview platform.
+ * Gemini prompts + strict parsers for the personalized interview platform.
  *
  * Three AI jobs, all grounded in candidate-provided material:
  * 1. Resume analysis -> CandidateProfile (hedged improvement areas, never facts).
  * 2. Interview generation -> Question[] in the app's own shape.
  * 3. Answer evaluation -> score + strengths + gaps + stronger example.
  */
-import { extractJson } from "./grok.js";
+
+/** Extract the first {...} JSON object from model text (tolerates fences). */
+export function extractJson(rawText) {
+  if (!rawText || typeof rawText !== "string") return null;
+  const stripped = rawText.replace(/```(?:json)?/gi, "").replace(/```/g, "").trim();
+  const start = stripped.indexOf("{");
+  const end = stripped.lastIndexOf("}");
+  if (start === -1 || end === -1 || end <= start) return null;
+  try {
+    return JSON.parse(stripped.slice(start, end + 1));
+  } catch {
+    return null;
+  }
+}
 
 // ---------------------------------------------------------------- resume ---
 export const RESUME_SYSTEM = `You analyze a candidate's resume for interview preparation.
@@ -154,7 +167,7 @@ Respond with ONLY this JSON object:
 {"score": <0-100 integer>, "verdict": "<broadly correct | partially correct | incorrect>", "understood": "<what the candidate did well>", "missing": "<gaps, including technical/content gaps>", "explanation": "<short overall assessment>", "tip": "<one concrete improvement tip>", "stronger_answer": "<a stronger example answer>", "interview_tip": "<short interview tip>"}`;
 }
 
-/** Parse Grok evaluation output. Same contract as before + stronger fields. */
+/** Parse Gemini evaluation output. Strict contract + stronger fields. */
 export function parseEvaluation(rawText) {
   const parsed = extractJson(rawText);
   if (!parsed || typeof parsed !== "object") return null;

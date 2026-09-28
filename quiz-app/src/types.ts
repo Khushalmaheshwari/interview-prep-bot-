@@ -66,7 +66,7 @@ export interface AIEvaluation {
   missing: string;
   explanation: string;
   tip: string;
-  /** A stronger example answer (Grok evaluation only; absent in older sessions). */
+  /** A stronger example answer (AI evaluation only; absent in older sessions). */
   stronger_answer?: string;
 }
 
