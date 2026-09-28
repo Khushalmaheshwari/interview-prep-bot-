@@ -1,29 +1,24 @@
 # Demo Script — 3–5 Minute Demonstration
 
 Setup before the audience arrives: `npm run server` (terminal 1),
-`npm run dev` (terminal 2), browser on the app. If a Gemini key is in
-`quiz-app/.env`, scenario answers grade live; otherwise the fallback shows —
-both paths are demoable.
+`npm run dev` (terminal 2), browser on the app. Grok key in `quiz-app/.env`
+for the live path. Have a 1–2 page text-based PDF resume ready (your own or a
+sample). Without a key, show the fallback line at step 4 and continue with the
+classic bank.
 
 | # | Do | Say |
 |---|----|-----|
-| 1 | Open the app (Home: **AI Interview Prep / Practice. Learn. Improve.**) | "Finance students revise from scattered PDFs with no feedback. This bot quizzes you for FP&A interviews, corrects you instantly, grades open answers with AI, and tells you what to revise next." |
-| 2 | Click **Start Quiz** → Setup. Point at **Role: Financial Analyst / FP&A**. | "One target role, so the bank stays realistic — accounting, analysis, corporate finance, FP&A, Excel, business cases." |
-| 3 | Select topic **FP&A**. | "Topic-wise practice, exactly what a syllabus needs." |
-| 4 | Select difficulty **Medium**. | "Easy, Medium, Hard, or Mixed — the counter shows matching questions live." |
-| 5 | Select **5 questions**. | "Five questions, five minutes — a realistic daily drill." |
-| 6 | Click **Start Quiz** (5 FP&A/Medium questions). | "The mix is shuffled every attempt." |
-| 7 | Answer one MCQ, click **Submit Answer**. | "Pick and submit — note you can't proceed without answering." |
-| 8 | Show **Correct/Incorrect + Correct Answer + Explanation + Interview Tip**. | "Deterministic checking — the answer key is known, so no AI is wasted here. Every miss teaches the interview line." |
-| 9 | On a scenario question, type 2–3 sentences, submit. | "Open-ended: explain a variance like you would to a hiring manager." |
-| 10 | Show **AI Evaluation**: score, verdict, got-right, missing, tip — then the model answer. | "Only here is the LLM used — where interpretation is required. Grounded in our model answer, and if the API is down you still get this fallback plus the model answer." |
-| 11 | Finish remaining questions, click **See Results**. | |
-| 12 | Show score %, Correct/Incorrect, Review list with AI scores. | "Headline score is objective questions only; scenarios carry their own AI score." |
-| 13 | Click **View Dashboard**. | "Everything is saved on-device — no login." |
-| 14 | Show previous-quiz row (topic, difficulty, questions, score). | "Your history, newest first." |
-| 15 | Show weakest topic bar. | "Simple arithmetic picks the lowest-scoring attempted topic — no black box." |
-| 16 | Show **Recommended Practice: Topic → Difficulty → 5 Questions**, click **Start Recommended Practice**. | "And one click turns the diagnosis into the next drill. That closes the loop: practice, learn, improve." |
+| 1 | Open the deployed website (Home: **AI Interview Prep / Prepare smarter. Interview better.**) | "Students revise from generic lists that ignore their background. This builds a mock interview from your own resume, for any role." |
+| 2 | Click **Upload Resume**, choose the PDF, click **Analyze Resume**. | "Resume stays in this session only — processed, never stored." |
+| 3 | Show the Candidate Profile: strengths and potential improvement areas. | "Note the wording — potential areas, possibilities an interviewer may explore. The AI must not state guesses as facts." |
+| 4 | Select a target role (e.g. Financial Analyst), difficulty, 5 questions. | "Any role — the same flow works for Marketing or Engineering. Difficulty and count are yours." |
+| 5 | Click **Start Interview**. | "Questions are generated per candidate — resume-based, technical, behavioral, scenario." |
+| 6 | Point at a resume-specific question. | "This one exists because of a line on the resume — that is the personalization." |
+| 7 | Answer an MCQ → submit → instant Correct/Incorrect + explanation. | "Objective checking is deterministic — no AI wasted where the key is known." |
+| 8 | Answer an open question in 2–3 sentences → submit. | "Now Grok judges what only interpretation can grade." |
+| 9 | Show Grok evaluation: score, verdict, strengths, gaps, stronger example. | "Score plus a better answer to learn from — grounded in the resume, with the model answer below for checking." |
+| 10 | Finish, **See Results** → score + review. | "Headline score stays objective-only; open answers carry their own AI scores." |
+| 11 | Open **Performance** → previous result, topic bars, weakest area, recommendation. | "Simple arithmetic, no black box — and one click turns the diagnosis into the next drill." |
 
-Fallback line (if AI key missing): "Without a key you see the designed
-fallback — model answer plus evaluation points — and the quiz, scoring and
-dashboard all keep working."
+Fallback line (no key / API down): "Without AI service you see the designed
+fallback — and the classic question bank keeps the whole loop demoable."

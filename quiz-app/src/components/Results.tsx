@@ -1,13 +1,16 @@
 import { useEffect, useRef, useState } from "react";
 import { AI_PASS_SCORE } from "../lib/dashboard";
 import { saveSession } from "../lib/history";
-import { scoreQuiz } from "../lib/quiz";
-import type { AnswerRecord, Question, QuizConfig, QuizSession, SessionDetail } from "../types";
+import { scoreQuiz, isOpenEnded, typeLabel } from "../lib/quiz";
+import type { AnswerRecord, Difficulty, Question, QuizConfig, QuizSession, SessionDetail } from "../types";
 
 interface Props {
   questions: Question[];
   answers: AnswerRecord[];
   config: QuizConfig;
+  difficulty: Difficulty;
+  role?: string;
+  personalized?: boolean;
   onRetake: () => void;
   onNewSetup: () => void;
   onDashboard: () => void;
@@ -28,7 +31,7 @@ function fmtDate(iso: string): string {
   }
 }
 
-export default function Results({ questions, answers, config, onRetake, onNewSetup, onDashboard }: Props) {
+export default function Results({ questions, answers, config, difficulty, role, personalized, onRetake, onNewSetup, onDashboard }: Props) {
   const score = scoreQuiz(answers);
   const byId = new Map(questions.map((q) => [q.id, q]));
   const savedRef = useRef(false);
@@ -41,8 +44,8 @@ export default function Results({ questions, answers, config, onRetake, onNewSet
     const session: QuizSession = {
       id: `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
       date: new Date().toISOString(),
-      topic: config.topic,
-      difficulty: config.difficulty,
+      topic: personalized && role ? role : config.topic,
+      difficulty,
       total: score.total,
       correct: score.correct,
       incorrect: score.incorrect,
@@ -52,7 +55,7 @@ export default function Results({ questions, answers, config, onRetake, onNewSet
       aiScores: answers
         .filter((a) => a.ai)
         .map((a) => ({ questionId: a.questionId, score: (a.ai as { score: number }).score })),
-      // Per-question topic breakdown for the Phase 4 dashboard.
+      // Per-question topic breakdown for the dashboard.
       details: answers.flatMap((a): SessionDetail[] => {
         const q = byId.get(a.questionId);
         if (!q) return [];
@@ -60,6 +63,8 @@ export default function Results({ questions, answers, config, onRetake, onNewSet
           a.correct !== null ? a.correct : a.ai ? a.ai.score >= AI_PASS_SCORE : null;
         return [{ topic: q.topic, difficulty: q.difficulty, correct }];
       }),
+      role: personalized ? role : undefined,
+      personalized: personalized || undefined,
     };
     const all = saveSession(session);
     setPrevious(all.filter((s) => s.id !== session.id).slice(0, 10));
@@ -79,10 +84,14 @@ export default function Results({ questions, answers, config, onRetake, onNewSet
           <Stat label="Questions" value={String(questions.length)} />
           <Stat label="Correct" value={String(score.correct)} />
           <Stat label="Incorrect" value={String(score.incorrect)} />
-          <Stat label="Topic" value={config.topic === "All" ? "All" : config.topic} wide />
+          <Stat
+            label={personalized ? "Role" : "Topic"}
+            value={personalized && role ? role : config.topic === "All" ? "All" : config.topic}
+            wide
+          />
         </div>
         <p className="mt-3 text-xs text-slate-500">
-          Difficulty: {config.difficulty}
+          Difficulty: {difficulty}
           {score.scenarioCount > 0 &&
             ` · ${score.scenarioCount} scenario answer(s) evaluated by AI, excluded from auto-score.`}
         </p>
@@ -119,14 +128,14 @@ export default function Results({ questions, answers, config, onRetake, onNewSet
               <li key={a.questionId + i} className="rounded-xl border p-4 text-sm">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
                   Q{i + 1} · {q.topic} · {q.difficulty} ·{" "}
-                  {a.correct === null ? "Scenario" : a.correct ? "Correct" : "Incorrect"}
+                  {a.correct === null ? typeLabel(q.type) : a.correct ? "Correct" : "Incorrect"}
                   {a.ai ? ` · AI ${a.ai.score}/100` : ""}
                 </p>
                 <p className="mt-1 font-semibold">{q.question}</p>
                 <p className="mt-2">
                   <strong>Your answer:</strong> {a.userAnswer || <em>(empty)</em>}
                 </p>
-                {q.type !== "scenario" ? (
+                {!isOpenEnded(q) ? (
                   <>
                     <p className="mt-1">
                       <strong>Correct:</strong> {q.correct_answer}

@@ -1,7 +1,11 @@
 import { useMemo, useState } from "react";
 import Dashboard from "./components/Dashboard";
+import InterviewSetup from "./components/InterviewSetup";
+import ProfileCard from "./components/ProfileCard";
 import QuizRunner from "./components/QuizRunner";
 import Results from "./components/Results";
+import ResumeUpload from "./components/ResumeUpload";
+import { generateInterview } from "./lib/ai";
 import { loadSessions } from "./lib/history";
 import { countBy, selectQuestions } from "./lib/quiz";
 import type { Recommendation } from "./lib/dashboard";
@@ -10,6 +14,7 @@ import {
   QUESTION_COUNTS,
   TOPICS,
   type AnswerRecord,
+  type CandidateProfile,
   type Difficulty,
   type Question,
   type QuizConfig,
@@ -17,17 +22,39 @@ import {
   type Topic,
 } from "./types";
 
-type Screen = "home" | "setup" | "quiz" | "results" | "dashboard";
+type Screen =
+  | "home"
+  | "upload"
+  | "profile"
+  | "bank"
+  | "quiz"
+  | "results"
+  | "dashboard";
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>("home");
+
+  // Personalized flow state (session only — resume never leaves memory).
+  const [profile, setProfile] = useState<CandidateProfile | null>(null);
+  const [resumeExcerpt, setResumeExcerpt] = useState("");
+  const [resumeFileName, setResumeFileName] = useState("");
+  const [role, setRole] = useState("Financial Analyst");
+  const [personalized, setPersonalized] = useState(false);
+  const [generating, setGenerating] = useState(false);
+  const [generateError, setGenerateError] = useState<string | null>(null);
+
+  // Classic bank flow state.
   const [config, setConfig] = useState<QuizConfig>({
     topic: "FP&A",
     difficulty: "Medium",
     count: 5,
   });
+
+  // Running quiz state.
   const [picked, setPicked] = useState<Question[]>([]);
   const [answers, setAnswers] = useState<AnswerRecord[]>([]);
+  const [runId, setRunId] = useState(0);
+  const [runDifficulty, setRunDifficulty] = useState<Difficulty>("Medium");
   const [sessions, setSessions] = useState<QuizSession[]>([]);
 
   const available = useMemo(
@@ -35,10 +62,38 @@ export default function App() {
     [config.topic, config.difficulty]
   );
 
-  const startQuiz = () => {
-    setPicked(selectQuestions(config));
+  const beginQuiz = (questions: Question[], isPersonalized: boolean) => {
+    setPicked(questions);
     setAnswers([]);
+    setPersonalized(isPersonalized);
+    setRunId((n) => n + 1);
     setScreen("quiz");
+  };
+
+  const startPersonalized = async (r: string, difficulty: Difficulty, count: number) => {
+    if (!profile || generating) return;
+    setRole(r);
+    setGenerating(true);
+    setGenerateError(null);
+    const result = await generateInterview({
+      profile,
+      resumeExcerpt,
+      role: r,
+      difficulty,
+      count,
+    });
+    setGenerating(false);
+    if (result.ok) {
+      setRunDifficulty(difficulty);
+      beginQuiz(result.questions, true);
+    } else {
+      setGenerateError(result.reason);
+    }
+  };
+
+  const startBankQuiz = () => {
+    setRunDifficulty(config.difficulty === "Mixed" ? "Medium" : config.difficulty);
+    beginQuiz(selectQuestions(config), false);
   };
 
   const openDashboard = () => {
@@ -47,11 +102,15 @@ export default function App() {
   };
 
   const startPractice = (rec: Recommendation) => {
-    const next: QuizConfig = { topic: rec.topic, difficulty: rec.difficulty, count: rec.count };
+    // Dashboard practice targets the classic bank; fall back to All when the
+    // recommended (possibly AI-generated) topic has no bank questions.
+    const next: QuizConfig =
+      countBy(rec.topic, rec.difficulty) > 0
+        ? { topic: rec.topic, difficulty: rec.difficulty, count: rec.count }
+        : { topic: "All", difficulty: rec.difficulty, count: rec.count };
     setConfig(next);
-    setPicked(selectQuestions(next));
-    setAnswers([]);
-    setScreen("quiz");
+    setRunDifficulty(next.difficulty === "Mixed" ? "Medium" : next.difficulty);
+    beginQuiz(selectQuestions(next), false);
   };
 
   return (
@@ -60,26 +119,15 @@ export default function App() {
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
           <button className="text-left" onClick={() => setScreen("home")}>
             <p className="text-lg font-bold">AI Interview Prep</p>
-            <p className="text-xs text-slate-500">Financial Analyst / FP&amp;A</p>
+            <p className="text-xs text-slate-500">Personalized interview practice</p>
           </button>
           <nav className="flex gap-2 text-sm">
             <NavBtn active={screen === "home"} onClick={() => setScreen("home")}>
               Home
             </NavBtn>
-            <NavBtn active={screen === "setup"} onClick={() => setScreen("setup")}>
-              Quiz Setup
-            </NavBtn>
             <NavBtn active={screen === "dashboard"} onClick={openDashboard}>
-              Dashboard
+              Performance
             </NavBtn>
-            {picked.length > 0 && (screen === "quiz" || screen === "results") && (
-              <NavBtn
-                active={screen === "results"}
-                onClick={() => answers.length > 0 && setScreen("results")}
-              >
-                Results
-              </NavBtn>
-            )}
           </nav>
         </div>
       </header>
@@ -88,35 +136,74 @@ export default function App() {
         {screen === "home" && (
           <>
             <section className="rounded-2xl bg-white p-10 text-center shadow-sm">
-              <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">
-                Phase 4 — Performance Dashboard
+              <h1 className="text-4xl font-extrabold">AI Interview Prep</h1>
+              <p className="mt-2 text-lg text-slate-600">
+                Prepare smarter. Interview better.
               </p>
-              <h1 className="mt-2 text-4xl font-extrabold">AI Interview Prep</h1>
-              <p className="mt-2 text-lg text-slate-600">Practice. Learn. Improve.</p>
               <p className="mx-auto mt-4 max-w-xl text-sm text-slate-600">
-                Prepare for <strong>Financial Analyst / FP&amp;A</strong> interviews
-                with topic-wise quizzes, instant feedback and AI evaluation of
-                scenario answers — then track your weakest areas on the dashboard.
+                Upload your resume and get a personalized interview experience —
+                questions built around your background and your target role,
+                with AI feedback on every open answer.
               </p>
               <button
-                onClick={() => setScreen("setup")}
-                className="mt-6 rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-700"
+                onClick={() => setScreen("upload")}
+                className="mt-6 rounded-xl bg-indigo-600 px-8 py-3 font-semibold text-white hover:bg-indigo-700"
               >
-                Start Quiz
+                Upload Resume
               </button>
-              <p className="mt-4 text-xs text-slate-400">
-                Demo: Home → Setup → Quiz → Results.
+              <p className="mt-4">
+                <button
+                  onClick={() => setScreen("bank")}
+                  className="text-xs font-semibold text-slate-500 hover:text-slate-700"
+                >
+                  Skip — try the classic question bank instead
+                </button>
               </p>
             </section>
             <RecentSessions />
           </>
         )}
 
-        {screen === "setup" && (
+        {screen === "upload" && (
+          <ResumeUpload
+            onAnalyzed={(p, excerpt, fileName) => {
+              setProfile(p);
+              setResumeExcerpt(excerpt);
+              setResumeFileName(fileName);
+              setGenerateError(null);
+              setScreen("profile");
+            }}
+            onClassic={() => setScreen("bank")}
+          />
+        )}
+
+        {screen === "profile" && profile && (
+          <div className="space-y-6">
+            <ProfileCard profile={profile} />
+            <InterviewSetup
+              initialRole={role}
+              generating={generating}
+              generateError={generateError}
+              onStart={startPersonalized}
+              onClassic={() => setScreen("bank")}
+              onBack={() => setScreen("upload")}
+            />
+            {resumeFileName && (
+              <p className="text-center text-xs text-slate-400">
+                Profile built from {resumeFileName} · kept in this session only.
+              </p>
+            )}
+          </div>
+        )}
+
+        {screen === "bank" && (
           <section className="rounded-2xl bg-white p-8 shadow-sm">
-            <h2 className="text-2xl font-bold">Quiz Setup</h2>
+            <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">
+              Classic Quiz
+            </p>
+            <h2 className="mt-1 text-2xl font-bold">Question bank practice</h2>
             <p className="mt-1 text-sm text-slate-600">
-              Role: <strong>Financial Analyst / FP&amp;A</strong>
+              No resume needed — fixed Finance/FP&A bank with instant feedback.
             </p>
 
             <div className="mt-6">
@@ -194,7 +281,7 @@ export default function App() {
                 Back
               </button>
               <button
-                onClick={startQuiz}
+                onClick={startBankQuiz}
                 disabled={available === 0}
                 className="rounded-xl bg-indigo-600 px-6 py-3 font-semibold text-white hover:bg-indigo-700 disabled:opacity-40"
               >
@@ -206,12 +293,18 @@ export default function App() {
 
         {screen === "quiz" && (
           <QuizRunner
+            key={runId}
             questions={picked}
-            onExit={() => setScreen("setup")}
+            onExit={() => setScreen(personalized ? "profile" : "bank")}
             onFinish={(a) => {
               setAnswers(a);
               setScreen("results");
             }}
+            evalContext={
+              personalized
+                ? { resumeContext: resumeExcerpt, role }
+                : undefined
+            }
           />
         )}
 
@@ -220,8 +313,11 @@ export default function App() {
             questions={picked}
             answers={answers}
             config={config}
-            onRetake={startQuiz}
-            onNewSetup={() => setScreen("setup")}
+            difficulty={runDifficulty}
+            role={personalized ? role : undefined}
+            personalized={personalized}
+            onRetake={personalized ? () => setScreen("profile") : startBankQuiz}
+            onNewSetup={() => setScreen(personalized ? "profile" : "bank")}
             onDashboard={openDashboard}
           />
         )}
@@ -230,14 +326,13 @@ export default function App() {
           <Dashboard
             sessions={sessions}
             onPractice={startPractice}
-            onSetup={() => setScreen("setup")}
+            onSetup={() => setScreen("home")}
           />
         )}
       </main>
 
       <footer className="mx-auto max-w-4xl px-6 pb-10 text-center text-xs text-slate-400">
-        Phase 4 build — full quiz with AI evaluation plus a simple performance
-        dashboard (averages, topic stats, weakest area, practice recommendation).
+        Practice. Learn. Improve. — your resume stays in this session only.
       </footer>
     </div>
   );
@@ -263,7 +358,7 @@ function RecentSessions() {
             className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2.5"
           >
             <span className="text-slate-600">
-              {s.topic} · {s.difficulty}
+              {s.role || s.topic} · {s.difficulty}
             </span>
             <span className="font-bold">{s.pct}%</span>
           </li>

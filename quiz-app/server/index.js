@@ -1,14 +1,17 @@
 /**
- * Minimal backend for Phase 3 — Gemini evaluation proxy + static hosting.
+ * Minimal backend — Grok AI proxy + resume processing + static hosting.
  *
- * Why a backend exists at all: the Gemini API key must NOT be exposed in
- * frontend code (PROJECT_PLAN.md section 14). This server holds the key in
- * an environment variable and exposes a single POST /api/evaluate endpoint.
- * MCQ / True-False scoring stays deterministic in the frontend; AI is used
- * only for scenario / open-ended answers.
+ * Why a backend exists: the Grok API key (XAI_API_KEY) must NOT be exposed in
+ * frontend code. The server holds it in an environment variable and exposes:
+ *   POST /api/resume/analyze      PDF -> candidate profile
+ *   POST /api/interview/generate   profile + role -> personalized questions
+ *   POST /api/evaluate             open-ended answer -> Grok evaluation
+ *   GET  /api/health               { ok, aiConfigured, provider }
+ *
+ * Resumes are processed in memory for the current session only — never stored.
  *
  * Run:
- *   npm run server        (serves API on PORT, default 3001; serves dist/ if built)
+ *   npm run server        (API on PORT, default 3001; serves dist/ if built)
  * Dev (two terminals):
  *   npm run server        (API)
  *   npm run dev           (Vite proxies /api -> localhost:3001)
@@ -18,22 +21,123 @@ import express from "express";
 import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
-import { SYSTEM_PROMPT, buildUserMessage, parseEvaluation } from "./prompt.js";
+import { extractText } from "unpdf";
+import { grokChat } from "./grok.js";
+import {
+  EVAL_SYSTEM,
+  INTERVIEW_SYSTEM,
+  RESUME_SYSTEM,
+  buildEvalMessage,
+  buildInterviewMessage,
+  buildResumeMessage,
+  parseEvaluation,
+  parseInterviewQuestions,
+  parseProfile,
+} from "./prompt.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
 const PORT = Number(process.env.PORT || 3001);
-const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-2.0-flash";
+const aiConfigured = () => Boolean(process.env.XAI_API_KEY);
 
-app.use(express.json({ limit: "64kb" }));
+// 10mb: resumes arrive as base64 inside JSON (no multipart needed).
+app.use(express.json({ limit: "10mb" }));
 
 app.get("/api/health", (_req, res) => {
-  res.json({ ok: true, aiConfigured: Boolean(GEMINI_API_KEY) });
+  res.json({ ok: true, provider: "grok", aiConfigured: aiConfigured() });
 });
 
+// ------------------------------------------------------- resume analyze ---
+app.post("/api/resume/analyze", async (req, res) => {
+  const { pdfBase64, fileName } = req.body || {};
+  if (typeof pdfBase64 !== "string" || pdfBase64.length === 0) {
+    return res.status(400).json({ ok: false, reason: "no_file" });
+  }
+  if (pdfBase64.length > 8_000_000) {
+    return res.status(400).json({ ok: false, reason: "file_too_large" });
+  }
+  if (!aiConfigured()) return res.json({ ok: false, reason: "not_configured" });
+
+  let text = "";
+  try {
+    const bytes = Buffer.from(pdfBase64, "base64");
+    if (bytes.subarray(0, 5).toString() !== "%PDF-") {
+      return res.status(400).json({ ok: false, reason: "not_a_pdf" });
+    }
+    const { text: raw } = await extractText(new Uint8Array(bytes));
+    text = (Array.isArray(raw) ? raw.join("\n") : String(raw || "")).trim();
+  } catch (err) {
+    console.error("PDF extraction failed:", err?.message || err);
+    return res.status(400).json({ ok: false, reason: "unreadable" });
+  }
+  if (text.replace(/\s/g, "").length < 200) {
+    // Scanned/image-only PDFs have (almost) no extractable text.
+    return res.status(400).json({ ok: false, reason: "unreadable" });
+  }
+
+  const result = await grokChat({
+    system: RESUME_SYSTEM,
+    user: buildResumeMessage(text.slice(0, 12000)),
+    maxTokens: 900,
+  });
+  if (!result.ok) return res.json(result);
+  const profile = parseProfile(result.text);
+  if (!profile) {
+    console.error("Grok returned unparseable profile:", result.text.slice(0, 300));
+    return res.json({ ok: false, reason: "bad_output" });
+  }
+  // Keep a short excerpt so later calls stay grounded without resending all.
+  return res.json({
+    ok: true,
+    profile,
+    fileName: typeof fileName === "string" ? fileName.slice(0, 120) : "",
+    resumeExcerpt: text.slice(0, 4000),
+  });
+});
+
+// ---------------------------------------------------- interview generate ---
+const DIFFS = ["Easy", "Medium", "Hard"];
+
+app.post("/api/interview/generate", async (req, res) => {
+  const { profile, resumeExcerpt, role, difficulty, count } = req.body || {};
+  if (!profile || typeof profile !== "object") {
+    return res.status(400).json({ ok: false, reason: "bad_request" });
+  }
+  if (typeof role !== "string" || !role.trim() || role.length > 80) {
+    return res.status(400).json({ ok: false, reason: "bad_request" });
+  }
+  const diff = DIFFS.includes(difficulty) ? difficulty : "Medium";
+  const n = Math.min(10, Math.max(3, Number(count) || 5));
+  if (!aiConfigured()) return res.json({ ok: false, reason: "not_configured" });
+
+  const result = await grokChat({
+    system: INTERVIEW_SYSTEM,
+    user: buildInterviewMessage({
+      profile,
+      role: role.trim(),
+      difficulty: diff,
+      count: n,
+      resumeExcerpt: String(resumeExcerpt || "").slice(0, 4000),
+    }),
+    maxTokens: 3000,
+    timeoutMs: 90000,
+  });
+  if (!result.ok) return res.json(result);
+  const questions = parseInterviewQuestions(result.text, n, diff);
+  if (!questions) {
+    console.error("Grok returned unparseable questions:", result.text.slice(0, 300));
+    return res.json({ ok: false, reason: "bad_output" });
+  }
+  // Re-id sequentially after validation drops.
+  questions.forEach((q, i) => {
+    q.id = `ai-${i + 1}`;
+  });
+  return res.json({ ok: true, questions });
+});
+
+// ------------------------------------------------------------ evaluate ---
 app.post("/api/evaluate", async (req, res) => {
-  const { question, idealAnswer, evaluationPoints, userAnswer } = req.body || {};
+  const { question, idealAnswer, evaluationPoints, userAnswer, resumeContext, role } = req.body || {};
 
   if (!userAnswer || typeof userAnswer !== "string" || !userAnswer.trim()) {
     return res.status(400).json({ ok: false, reason: "empty_answer" });
@@ -44,56 +148,27 @@ app.post("/api/evaluate", async (req, res) => {
   if (userAnswer.length > 2000) {
     return res.status(400).json({ ok: false, reason: "answer_too_long" });
   }
+  if (!aiConfigured()) return res.json({ ok: false, reason: "not_configured" });
 
-  // No key configured (e.g. professor demo without a key): tell the
-  // frontend to show the fallback. The quiz itself keeps working.
-  if (!GEMINI_API_KEY) {
-    return res.json({ ok: false, reason: "not_configured" });
+  const result = await grokChat({
+    system: EVAL_SYSTEM,
+    user: buildEvalMessage({
+      question,
+      idealAnswer,
+      evaluationPoints,
+      userAnswer,
+      resumeContext: String(resumeContext || "").slice(0, 2000),
+      role: typeof role === "string" ? role.slice(0, 80) : "",
+    }),
+    maxTokens: 900,
+  });
+  if (!result.ok) return res.json(result);
+  const evaluation = parseEvaluation(result.text);
+  if (!evaluation) {
+    console.error("Grok returned unparseable evaluation:", result.text.slice(0, 300));
+    return res.json({ ok: false, reason: "bad_output" });
   }
-
-  const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), 20000);
-
-  try {
-    const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}` +
-      `:generateContent?key=${encodeURIComponent(GEMINI_API_KEY)}`;
-    const response = await fetch(url, {
-      method: "POST",
-      signal: controller.signal,
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: buildUserMessage({ question, idealAnswer, evaluationPoints, userAnswer }) }],
-          },
-        ],
-        generationConfig: { temperature: 0.2, maxOutputTokens: 512 },
-      }),
-    });
-
-    if (!response.ok) {
-      console.error("Gemini API error:", response.status, await response.text().catch(() => ""));
-      return res.json({ ok: false, reason: "api_error" });
-    }
-
-    const data = await response.json();
-    const rawText =
-      data?.candidates?.[0]?.content?.parts?.map((p) => p.text || "").join("") || "";
-    const evaluation = parseEvaluation(rawText);
-    if (!evaluation) {
-      console.error("Gemini returned unparseable output:", rawText.slice(0, 300));
-      return res.json({ ok: false, reason: "bad_output" });
-    }
-    return res.json({ ok: true, evaluation });
-  } catch (err) {
-    console.error("Evaluation failed:", err?.message || err);
-    return res.json({ ok: false, reason: "api_error" });
-  } finally {
-    clearTimeout(timeout);
-  }
+  return res.json({ ok: true, evaluation });
 });
 
 // Serve the production build (if present) so one process hosts app + API.
@@ -108,5 +183,7 @@ if (fs.existsSync(distDir)) {
 }
 
 app.listen(PORT, () => {
-  console.log(`Quiz server on http://localhost:${PORT} (AI ${GEMINI_API_KEY ? "configured" : "NOT configured — fallback mode"})`);
+  console.log(
+    `Interview server on http://localhost:${PORT} (Grok ${aiConfigured() ? "configured" : "NOT configured — fallback mode"})`
+  );
 });

@@ -1,9 +1,9 @@
 import questionsData from "../data/questions.json";
-import type { AnswerRecord, Question, QuizConfig } from "../types";
+import type { AnswerRecord, OpenQuestion, Question, QuizConfig } from "../types";
 
 export const QUESTIONS: Question[] = questionsData as Question[];
 
-/** Filter questions by topic + difficulty (Phase 1 core logic). */
+/** Filter questions by topic + difficulty (classic bank). */
 export function filterQuestions(config: QuizConfig): Question[] {
   return QUESTIONS.filter((q) => {
     const topicOk = config.topic === "All" || q.topic === config.topic;
@@ -25,9 +25,22 @@ export function countBy(topic: QuizConfig["topic"], difficulty: QuizConfig["diff
   return filterQuestions({ topic, difficulty, count: 9999 }).length;
 }
 
-/** Deterministic correctness check for objective questions (Phase 2, no AI). */
+/** Open-ended questions (scenario/behavioral) need AI judgement; all else is deterministic. */
+export function isOpenEnded(question: Question): question is OpenQuestion {
+  return question.type === "scenario" || question.type === "behavioral";
+}
+
+/** Human label for a question type. */
+export function typeLabel(t: Question["type"]): string {
+  if (t === "mcq") return "MCQ";
+  if (t === "true_false") return "True/False";
+  if (t === "behavioral") return "Behavioral";
+  return "Scenario";
+}
+
+/** Deterministic correctness check for objective questions (never AI). */
 export function isCorrect(question: Question, userAnswer: string): boolean | null {
-  if (question.type === "scenario") return null;
+  if (isOpenEnded(question)) return null;
   return userAnswer === question.correct_answer;
 }
 

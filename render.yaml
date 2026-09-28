@@ -1,16 +1,17 @@
 # Render hosting config (free Web Service).
 # In Render: New → Web Service → connect your repo.
 # Root Directory: quiz-app (or leave empty if you push only quiz-app/).
-# Add GEMINI_API_KEY in the dashboard (Environment tab) — never commit it.
+# Add XAI_API_KEY in the dashboard (Environment tab) — never commit it.
+# Get a key at https://console.x.ai (Grok API usage is billed per token).
 services:
   - type: web
-    name: fpa-quiz-bot
+    name: interview-prep-bot
     runtime: node
     rootDir: quiz-app
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm run start
     envVars:
-      - key: GEMINI_MODEL
-        value: gemini-2.0-flash
-      - key: GEMINI_API_KEY
+      - key: GROK_MODEL
+        value: grok-4.6
+      - key: XAI_API_KEY
         sync: false

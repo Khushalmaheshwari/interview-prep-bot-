@@ -1,21 +1,23 @@
 import { useRef, useState } from "react";
 import { evaluateAnswer } from "../lib/ai";
-import { isCorrect } from "../lib/quiz";
+import { isCorrect, isOpenEnded } from "../lib/quiz";
 import type {
   AIEvaluation,
   AnswerRecord,
   ObjectiveQuestion,
   Question,
-  ScenarioQuestion,
+  OpenQuestion,
 } from "../types";
 
 interface Props {
   questions: Question[];
   onFinish: (answers: AnswerRecord[]) => void;
   onExit: () => void;
+  /** Resume grounding for AI evaluation (personalized interviews). */
+  evalContext?: { resumeContext: string; role: string };
 }
 
-export default function QuizRunner({ questions, onFinish, onExit }: Props) {
+export default function QuizRunner({ questions, onFinish, onExit, evalContext }: Props) {
   const [index, setIndex] = useState(0);
   const [selected, setSelected] = useState<string | null>(null);
   const [text, setText] = useState("");
@@ -41,7 +43,7 @@ export default function QuizRunner({ questions, onFinish, onExit }: Props) {
 
   const q = questions[index];
   const isLast = index === questions.length - 1;
-  const isObjective = q.type === "mcq" || q.type === "true_false";
+  const isObjective = !isOpenEnded(q);
   const currentRecord = answers[index];
 
   const canSubmit = submitted
@@ -66,13 +68,15 @@ export default function QuizRunner({ questions, onFinish, onExit }: Props) {
     // AI evaluation ONLY for scenario answers. Objective scoring stays
     // deterministic. Failures resolve to null -> fallback UI, quiz continues.
     if (!isObjective) {
-      const sq = q as ScenarioQuestion;
+      const sq = q as OpenQuestion;
       setLoadingId(sq.id);
       void evaluateAnswer({
         question: sq.question,
         idealAnswer: sq.ideal_answer,
         evaluationPoints: sq.evaluation_points,
         userAnswer,
+        resumeContext: evalContext?.resumeContext,
+        role: evalContext?.role,
       }).then((result) => {
         const ai = result.ok ? result.evaluation : null;
         aiRef.current.set(sq.id, ai);
@@ -159,7 +163,7 @@ export default function QuizRunner({ questions, onFinish, onExit }: Props) {
               className="w-full rounded-xl border px-4 py-3 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100 disabled:bg-slate-50"
             />
             <p className="mt-1 text-xs text-slate-400">
-              Scenario question — AI will evaluate your answer after you submit.
+              Open-ended question — AI will evaluate your answer after you submit.
             </p>
           </div>
         )}
@@ -199,7 +203,7 @@ function FeedbackPanel({
   isLast: boolean;
   onNext: () => void;
 }) {
-  if (question.type === "scenario") {
+  if (isOpenEnded(question)) {
     const ai = record.ai;
     return (
       <div className="mt-5 space-y-4">
@@ -229,6 +233,11 @@ function FeedbackPanel({
               <p>
                 <strong>Improvement tip:</strong> {ai.tip || "—"}
               </p>
+              {ai.stronger_answer && (
+                <p>
+                  <strong>Stronger example:</strong> {ai.stronger_answer}
+                </p>
+              )}
             </div>
           ) : (
             <p className="mt-2">

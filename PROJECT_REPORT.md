@@ -1,109 +1,117 @@
-# Project Report — AI Interview-Prep Quiz Bot (Financial Analyst / FP&A)
+# Project Report — AI Interview Preparation Platform (Resume → Personalized Interview)
 
 Demo project for the MBA end-term: `quiz-app/` (React + TypeScript + Tailwind,
-minimal Express proxy, Gemini API, local JSON bank of 36 questions).
+minimal Express proxy, Grok API, classic Finance bank of 36 questions as fallback).
+
+Core loop: **upload resume → AI candidate profile → pick any target role →
+AI-generated personalized interview → Grok feedback → results + dashboard.**
 
 ## A. Business & Strategic Framing
 
-1. **Problem.** Finance students preparing for FP&A/analyst interviews have
-   scattered material (textbooks, PDFs, generic question lists) with no instant
-   checking, no interview-style open-ended practice and no view of weak areas.
-2. **Target user.** MBA / master's finance students preparing for Financial
-   Analyst / FP&A interviews. Paying customer (if commercialised) would be the
-   student or a university careers office; the end user is the student.
-3. **Why useful.** One loop — pick a topic mix, answer, get instant correction
-   plus interview tips, have scenario answers graded like a mock interviewer,
-   and see exactly which topic to revise next.
-4. **Value proposition.** Interview-ready practice in 5-minute sessions:
-   deterministic correctness where answers are known, AI judgement where only
-   interpretation works, and a dashboard that points at the weakest area.
+1. **Problem.** Students prepare for interviews with generic question lists that
+   ignore their background; mock interviews with humans are scarce and
+   expensive, and static material gives no feedback on open-ended answers.
+2. **Target user.** MBA / master's students preparing for role interviews
+   across functions (Finance, Marketing, Consulting, Product, Engineering…).
+   Paying customer (if commercialised) would be the student or a university
+   careers office; the end user is the student.
+3. **Why useful.** One loop — the resume becomes the curriculum: profile
+   strengths and gaps are surfaced, questions probe the candidate's own
+   experience and target role, open answers are graded like a mock interviewer,
+   and the dashboard points at what to revise next.
+4. **Value proposition.** A personal mock interview in 5-minute sessions:
+   deterministic correctness where answers are known, Grok judgement where
+   only interpretation works, grounded in the candidate's own resume.
 5. **SWOT.**
-   - Strengths: instant feedback with explanations + tips; genuine AI use
-     confined to where it adds value; runs with or without an API key.
-   - Weaknesses: only 36 questions (retakes repeat); single device/browser
-     history; AI scores are approximate, not examiner-grade.
-   - Opportunities: more roles/topics, campus licences, placement-cell analytics.
-   - Threats: Gemini price/model changes; free general chatbots as
-     good-enough substitutes; curriculum drift making the bank stale.
-6. **Alternatives.** Quizlet/flashcard decks (no grading of open answers),
-   Wall Street Oasis / CFI question lists (static, no feedback loop), generic
-   ChatGPT practice (no curriculum structure, no score tracking, hallucinates
-   answer keys). Ours combines a fixed correct-answer bank with AI only for
-   open answers plus progress tracking.
+   - Strengths: resume-grounded personalization for any role; instant feedback
+     with explanations + tips; runs with or without an API key (classic bank).
+   - Weaknesses: AI question/answer quality varies; single device/browser
+     history; only text-based PDFs readable; scores are approximate.
+   - Opportunities: more roles, campus licences, placement-cell analytics,
+     interviewer-side question review.
+   - Threats: xAI price/model changes; free general chatbots as good-enough
+     substitutes; resume-parsing edge cases (scans, graphics-heavy CVs).
+6. **Alternatives.** Generic chatbot practice (no structure, no score tracking,
+   hallucinates answer keys), static question lists / WSO / CFI (no personal
+   feedback), human mock interviews (expensive, unscalable). Ours combines
+   resume grounding + structured bank fallback + progress tracking.
 7. **Adoption/monetisation (hypothetical).** Freemium per-student; paid campus
-   licence for careers offices with cohort dashboards; question-pack add-ons
-   per role (IB, equity research). Not implemented — out of scope for the demo.
+   licence for careers offices with cohort dashboards. Not implemented.
 
 ## B. AI & Technical Understanding
 
-1. **Model/API.** Google Gemini via REST `generateContent`, default model
-   `gemini-2.0-flash` (overridable with `GEMINI_MODEL`).
-2. **Why this one.** Accessible free-tier API, fast enough for per-answer
-   grading, good instruction-following for strict JSON output; flash-tier
-   latency/cost fits a classroom demo. No fine-tuning or RAG needed — the
-   "knowledge" is the hand-written ideal answer shipped with each question.
-3. **Where AI is used.** Only for scenario/open-ended answers: score 0–100,
-   verdict, what was understood, what is missing, explanation, improvement tip.
-   MCQ/True-False never touch the model.
-4. **Prompt approach.** `server/prompt.js`: system instruction (evaluate only
-   the submitted answer against the provided ideal answer + criteria, don't
-   invent facts, concise 1–3 sentence fields, JSON object only) plus a user
-   message carrying question, ideal answer, evaluation points and candidate
-   answer. `temperature 0.2`, `maxOutputTokens 512`.
-5. **Guardrails.** Key lives server-side (`server/index.js` reads
-   `GEMINI_API_KEY`; the browser only calls same-origin `/api/evaluate`);
-   2000-character answer cap; empty answers rejected; response parsed as JSON
-   with score clamped 0–100 and defaulted fields; any failure returns
-   `ok:false` and the UI shows the fallback sentence with the model answer.
-6. **Why deterministic scoring for MCQs.** The correct answer is already known,
-   so an LLM adds latency, cost and hallucination risk for zero benefit:
-   `userAnswer === correct_answer`. LLM judgement is reserved for responses
-   that require interpretation. This is stated in the app's design and demo.
-7. **Limitations.** AI grades against a short ideal answer, so terse-but-right
-   or unusually-phrased answers can be under-scored; no streaming; English
-   only; needs network + key or it degrades to the model answer.
+1. **Model/API.** xAI Grok via OpenAI-compatible REST
+   `POST https://api.x.ai/v1/chat/completions`, default model `grok-4.6`
+   (overridable with `GROK_MODEL`).
+2. **Why this one.** Required by the brief; technically it fits: strong
+   instruction-following for strict JSON output, single text endpoint for all
+   three AI jobs, plain `fetch` integration with no SDK. No fine-tuning or RAG
+   needed — the "knowledge" is the uploaded resume plus per-question ideal
+   answers.
+3. **Where AI is used.** (a) Resume → candidate profile; (b) profile + role →
+   personalized questions (technical, resume-based, behavioral, situational,
+   scenario); (c) open-answer evaluation (score, verdict, strengths, gaps,
+   stronger example, tip). MCQ/True-False never touch the model.
+4. **Prompt approach.** `server/prompt.js`: three system prompts sharing one
+   doctrine — use only provided material, never invent candidate facts,
+   hedge improvement areas ("potential", "may explore"), concise fields,
+   JSON-object-only output. Generation/difficulty/count are injected;
+   evaluation additionally receives resume excerpts + target role.
+5. **Guardrails.** Key server-side only (`XAI_API_KEY`; browser calls
+   same-origin `/api/*`); PDF magic-byte + 5 MB + 200-char readability checks;
+   generated questions re-validated in code (options contain the correct
+   answer, else dropped); scores clamped 0–100 with defaulted fields; every
+   failure returns `ok:false` → fallback UI, quiz continues.
+6. **Why deterministic scoring for MCQs.** The correct answer is already known
+   (authored or AI-supplied with the question), so an LLM adds latency, cost
+   and hallucination risk for zero benefit: `userAnswer === correct_answer`.
+   LLM judgement is reserved for responses that require interpretation.
+7. **Limitations.** Generation quality depends on resume richness; terse-but-right
+   answers can be under-scored; English only; needs network + funded key or it
+   degrades to the classic bank / model answers.
 
 ## C. Critical Thinking
 
-1. **How AI could be wrong.** Example: a candidate writes "receivables rose
-   because the firm stuffed the channel" — correct intuition, but if the ideal
-   answer phrases it as "revenue booked before cash collected", a literal model
-   may mark the mechanism missing. Scores also compress toward the middle on
-   vague answers. The Review screen keeps the model answer visible so errors
-   are checkable.
-2. **Don't blindly trust.** The AI score/verdict and its finance phrasing —
-   verify against the model answer and evaluation points shown underneath.
-3. **API failure.** The quiz never breaks: loading state → fallback message
-   ("AI feedback is temporarily unavailable. Please review the model answer."),
-   objective scoring unaffected, results still save (scenario recorded without
-   AI score and excluded from topic stats).
+1. **How AI could be wrong.** Example: a candidate's correct-but-unusual
+   phrasing may miss the model's 2–3 evaluation bullets and be under-scored;
+   a thin resume yields generic questions; a confident wrong ideal answer in a
+   generated MCQ would teach the wrong key (mitigated by code validation, not
+   eliminated). Every AI judgement is shown next to its model answer/criteria
+   so errors are checkable.
+2. **Don't blindly trust.** AI scores, generated answer keys and inferred
+   "improvement areas" — verify against model answers; improvement areas are
+   possibilities, explicitly not facts.
+3. **API failure.** The app never breaks: loading states → "AI service is
+   temporarily unavailable. Please try again." (or the classic-bank detour);
+   objective scoring unaffected; results still save (open answers recorded
+   without AI score and excluded from topic stats).
 4. **Accountability.** The student remains responsible for their learning; the
    app is a practice aid, scores are formative, and every AI judgement is
-   displayed next to the human-written model answer it was checked against.
+   displayed next to the human- or model-written reference it was checked
+   against. Resumes are processed in-session only and never stored.
 5. **Biggest limitation.** The LLM has no real examiner judgement — it matches
-   text against 2–3 bullet criteria. Anything subtle (trade-offs, prioritised
+   text against short criteria. Anything subtle (trade-offs, prioritised
    actions) is approximated, which is why AI output never feeds the headline
-   quiz percentage.
+   quiz percentage and improvement areas stay hedged.
 
 ## D. Execution
 
-1. **Duplicates/repeats.** Within a quiz, questions are shuffled then sliced —
-   never repeated. Across quizzes/retakes the 36-question bank reshuffles, so
-   repeats are possible and expected; the setup screen always shows how many
-   match the filter.
+1. **Duplicates/repeats.** AI interviews are generated fresh per attempt (no
+   bank repetition); classic-bank quizzes shuffle then slice (no in-quiz
+   repeats; repeats possible across retakes of 36 questions).
 2. **AI failure.** See C3: `ok:false` at any layer (no key, HTTP error,
-   timeout, unparseable output, network down) → fallback UI, quiz continues,
-   session saves with `ai: null`.
+   timeout, unparseable output, unreadable PDF, network down) → precise
+   fallback message, quiz continues, session saves with `ai: null`.
 3. **Empty answers.** Submit stays disabled until an option is picked or the
-   textarea is non-blank; the API additionally rejects blank/oversize input
-   with 400.
+   textarea is non-blank ("Please provide an answer before continuing."); the
+   API additionally rejects blank/oversize input with 400.
 4. **Score calculation.** Headline `%` = correct ÷ attempted over objective
-   questions only (`scoreQuiz`). Scenarios never move it; each carries its own
-   AI score. Dashboard topic stats reuse the same rule, counting a scenario as
-   correct only if its AI score ≥ 60 (`AI_PASS_SCORE`); answers without AI are
-   excluded. Averages/best are plain means/maxima of saved session percentages.
+   questions only (`scoreQuiz`). Open answers never move it; each carries its
+   own AI score. Dashboard topic stats reuse the rule, counting an open answer
+   as correct only if its AI score ≥ 60 (`AI_PASS_SCORE`); answers without AI
+   are excluded. Averages/best are means/maxima of saved percentages.
 5. **Session tracking.** Each finished quiz is saved once to `localStorage`
-   key `fpa-quiz-history-v1` (id, ISO date, topic, difficulty, totals, pct,
-   per-question topic details, AI scores; capped at 50). Dashboard, Results
-   history and Home recents all read this store; corrupt data is ignored and
-   the quiz keeps working. Single demo user, single device by design.
+   key `fpa-quiz-history-v1` (id, ISO date, role/topic, difficulty, totals,
+   pct, per-question topic details, AI scores, role/personalized flags; capped
+   at 50). Dashboard, Results history and Home recents all read this store;
+   corrupt data is ignored. Single demo user, single device by design.

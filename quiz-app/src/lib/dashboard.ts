@@ -31,11 +31,11 @@ const REAL_TOPICS = TOPICS.filter((t): t is Topic => t !== "All");
 const DIFF_ORDER: Difficulty[] = ["Easy", "Medium", "Hard"];
 
 /**
- * All Phase 4 maths in one place — plain counts and averages, no AI/ML.
+  * All dashboard maths in one place — plain counts and averages, no AI/ML.
  * - Overall average/best come straight from saved session percentages.
  * - Topic stats come from per-question details (objective: deterministic
  *   correctness; scenario: AI score >= AI_PASS_SCORE). Sessions saved before
- *   Phase 4 have no details: a session on a single topic falls back to its
+  * details: a session on a single topic falls back to its
  *   aggregate score; "All"-topic sessions without details can't be attributed
  *   and are skipped for topic stats (they still count overall).
  */
