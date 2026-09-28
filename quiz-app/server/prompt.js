@@ -29,7 +29,7 @@ Rules:
 - Strengths must be backed by something visible in the resume.
 - Improvement areas MUST be hedged: phrase every item as potential ("Potential area to improve: ...", "The interviewer may explore ..."). Never present an inferred weakness as a fact.
 - Be concise: short strings, at most 6 items per list.
-- Return ONLY the JSON object described below. No markdown, no code fences, no extra keys.`;
+- Return ONLY the JSON object, on a single line with no line breaks or pretty-printing. No markdown, no code fences, no extra keys.`;
 
 export function buildResumeMessage(resumeText) {
   return `Resume text:

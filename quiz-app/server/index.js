@@ -78,7 +78,7 @@ app.post("/api/resume/analyze", async (req, res) => {
   const result = await geminiChat({
     system: RESUME_SYSTEM,
     user: buildResumeMessage(text.slice(0, 12000)),
-    maxTokens: 900,
+    maxTokens: 1400,
   });
   if (!result.ok) return res.json(result);
   const profile = parseProfile(result.text);

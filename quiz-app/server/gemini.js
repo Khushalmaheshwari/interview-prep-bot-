@@ -28,9 +28,10 @@ export async function geminiChat({ system, user, maxTokens = 1200, temperature =
     generationConfig: { temperature, maxOutputTokens: maxTokens },
   });
 
-  // One automatic retry on 503: free-tier capacity flaps, and a second
-  // attempt seconds later often succeeds.
-  for (let attempt = 1; attempt <= 2; attempt++) {
+  // Retries on 503: free-tier capacity flaps, and a later attempt
+  // seconds later often succeeds.
+  const waits = [8000, 20000];
+  for (let attempt = 1; attempt <= 3; attempt++) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
     try {
@@ -40,9 +41,10 @@ export async function geminiChat({ system, user, maxTokens = 1200, temperature =
         headers: { "Content-Type": "application/json" },
         body,
       });
-      if (response.status === 503 && attempt === 1) {
-        console.warn("Gemini 503 — retrying once in 8s…");
-        await new Promise((r) => setTimeout(r, 8000));
+      if (response.status === 503 && attempt < 3) {
+        const wait = waits[attempt - 1];
+        console.warn(`Gemini 503 — retrying in ${wait / 1000}s…`);
+        await new Promise((r) => setTimeout(r, wait));
         continue;
       }
       if (!response.ok) {
