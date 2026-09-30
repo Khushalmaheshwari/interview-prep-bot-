@@ -143,37 +143,44 @@ function shortDate(iso: string): string {
 /** Bar chart of session scores, chronological, last 10. Pure SVG, no deps. */
 function ScoreTrend({ sessions }: { sessions: QuizSession[] }) {
   const last = [...sessions].reverse().slice(-10);
-  const W = 320;
-  const H = 130;
+  const W = 340;
+  const H = 140;
+  const LEFT = 34;
+  const BOTTOM = 20;
+  const TOP = 8;
   const GAP = 6;
-  const bw = (W - GAP * (last.length - 1)) / Math.max(last.length, 1);
+  const base = H - BOTTOM;
+  const plotH = base - TOP;
+  const yOf = (pct: number) => base - (pct / 100) * plotH;
+  const bw = (W - LEFT - GAP * (last.length - 1)) / Math.max(last.length, 1);
   return (
     <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 w-full" role="img" aria-label="Score trend chart">
-      {[25, 50, 75].map((g) => (
-        <line
-          key={g}
-          x1={0}
-          x2={W}
-          y1={H - 18 - (g / 100) * (H - 30)}
-          y2={H - 18 - (g / 100) * (H - 30)}
-          stroke="#1e293b"
-          strokeWidth={1}
-        />
+      {[0, 25, 50, 75, 100].map((g) => (
+        <g key={g}>
+          <line x1={LEFT} x2={W} y1={yOf(g)} y2={yOf(g)} stroke="#1e293b" strokeWidth={1} />
+          <text x={LEFT - 5} y={yOf(g) + 3} textAnchor="end" fontSize={9} fill="#64748b">
+            {g}%
+          </text>
+        </g>
       ))}
+      <line x1={LEFT} x2={W} y1={base} y2={base} stroke="#334155" strokeWidth={1.5} />
       {last.map((s, i) => {
-        const h = Math.max(4, (s.pct / 100) * (H - 30));
-        const x = i * (bw + GAP);
+        const h = Math.max(4, (s.pct / 100) * plotH);
+        const x = LEFT + i * (bw + GAP);
         const color = s.pct >= 60 ? "#6366f1" : s.pct >= 40 ? "#f59e0b" : "#f43f5e";
         return (
           <g key={s.id}>
             <title>{`${shortDate(s.date)} — ${s.pct}%`}</title>
-            <rect x={x} y={H - 18 - h} width={bw} height={h} rx={3} fill={color} />
-            <text x={x + bw / 2} y={H - 5} textAnchor="middle" fontSize={8} fill="#64748b">
+            <rect x={x} y={base - h} width={bw} height={h} rx={3} fill={color} />
+            <text x={x + bw / 2} y={H - 6} textAnchor="middle" fontSize={8} fill="#64748b">
               {shortDate(s.date)}
             </text>
           </g>
         );
       })}
+      <text x={LEFT - 5} y={TOP - 1} textAnchor="end" fontSize={9} fill="#64748b">
+        Score
+      </text>
     </svg>
   );
 }
