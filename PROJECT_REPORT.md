@@ -11,9 +11,16 @@ history. No login, no database — single demo user by design.
 **Core loop:** resume / role / company / industry / JD → candidate profile →
 personalized questions → answers → AI evaluation → results → dashboard.
 
-**Entry points:** (1) Upload Resume → profile → setup; (2) Quick setup, no
-resume (role + company + industry); (3) Topic Quiz — Finance runs a fixed
-36-question offline bank, other topics generate AI quizzes.
+**Entry points:** (1) Upload Resume → profile (strengths, hedged improvement
+areas, readiness ring) → setup; (2) Quick setup, no resume (searchable role
+box, company, industry, optional JD); (3) Topic Quiz — Finance runs a fixed
+36-question offline bank, Marketing/HR/Operations/Data generate AI quizzes.
+
+**Also shipped:** standalone Tips page (general + 8 roles), free numeric
+question count (3–10) on every setup screen, Performance charts (score-trend
+bars with marked axes, accuracy donut), streak + best badges on Home, voice
+input mic on open answers, one-click Markdown report download, Technical /
+Behavioral&HR / Scenario split on Results.
 
 ---
 
@@ -257,11 +264,12 @@ Deterministic layers are exactly consistent.
 
 - **Run:** `cd quiz-app && npm install`, then `npm run server` + `npm run dev`
   (app `http://localhost:5173`); prod: `npm run build && npm run start`.
-- **Key:** `GROQ_API_KEY` in `quiz-app/.env` (local) or Render dashboard;
+- **Key:** `GROQ_API_KEY` in `quiz-app/.env` (local) or Vercel dashboard;
   `GROQ_MODEL` default `openai/gpt-oss-20b`; never in code/git.
-- **Deploy:** `render.yaml` one-process web service (Root Dir `quiz-app`);
-  free tier sleeps when idle (~1 min cold start). URL shape:
-  `https://<name>.onrender.com`.
+- **Deploy (live):** Vercel, Root Directory `quiz-app` (auto Vite build,
+  serverless `api/` functions, 60s timeout). Live URL:
+  `https://interview-prep-bot-sigma.vercel.app/`. Free tier: fast cold starts;
+  Groq free rate limits still apply.
 - **Limits:** Groq free rate limits; text PDFs only; history per-browser
   (50 sessions); AI advisory, verify against model answers.
 - **Tests (all green):** build + lint; server suite 19 (endpoints, validation,
