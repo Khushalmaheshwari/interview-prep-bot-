@@ -1,10 +1,10 @@
 # Project Report — AI Interview Preparation Platform (Resume → Personalized Interview)
 
 Demo project for the MBA end-term: `quiz-app/` (React + TypeScript + Tailwind,
-minimal Express proxy, Gemini API, classic Finance bank of 36 questions as fallback).
+minimal Express proxy, Groq API, classic Finance bank of 36 questions as fallback).
 
 Core loop: **upload resume → AI candidate profile → pick any target role →
-AI-generated personalized interview → Gemini feedback → results + dashboard.**
+AI-generated personalized interview → Groq feedback → results + dashboard.**
 
 ## A. Business & Strategic Framing
 
@@ -20,7 +20,7 @@ AI-generated personalized interview → Gemini feedback → results + dashboard.
    experience and target role, open answers are graded like a mock interviewer,
    and the dashboard points at what to revise next.
 4. **Value proposition.** A personal mock interview in 5-minute sessions:
-   deterministic correctness where answers are known, Gemini judgement where
+   deterministic correctness where answers are known, Groq judgement where
    only interpretation works, grounded in the candidate's own resume.
 5. **SWOT.**
    - Strengths: resume-grounded personalization for any role; instant feedback
@@ -29,7 +29,7 @@ AI-generated personalized interview → Gemini feedback → results + dashboard.
      history; only text-based PDFs readable; scores are approximate.
    - Opportunities: more roles, campus licences, placement-cell analytics,
      interviewer-side question review.
-   - Threats: Gemini price/model changes; free general chatbots as good-enough
+   - Threats: Groq price/model changes; free general chatbots as good-enough
      substitutes; resume-parsing edge cases (scans, graphics-heavy CVs).
 6. **Alternatives.** Generic chatbot practice (no structure, no score tracking,
    hallucinates answer keys), static question lists / WSO / CFI (no personal
@@ -40,13 +40,14 @@ AI-generated personalized interview → Gemini feedback → results + dashboard.
 
 ## B. AI & Technical Understanding
 
-1. **Model/API.** Google Gemini via REST `generateContent`
-   (`https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent`),
-   default model `gemini-3.6-flash` (overridable with `GEMINI_MODEL`).
-2. **Why this one.** Accessible key with a free tier (AI Studio), fast
-   flash-tier latency for per-answer grading, good instruction-following for
-   strict JSON output, single text endpoint for all three AI jobs, plain
-   `fetch` integration with no SDK. No fine-tuning or RAG needed — the
+1. **Model/API.** Groq via OpenAI-compatible REST
+   `POST https://api.groq.com/openai/v1/chat/completions`,
+   default model `openai/gpt-oss-20b` (overridable with `GROQ_MODEL`).
+2. **Why this one.** Generous free tier (console.groq.com) after Gemini's
+   20-requests/day cap blocked the demo; fast inference for per-answer
+   grading, good instruction-following for strict JSON output, single
+   OpenAI-compatible endpoint for all three AI jobs, plain `fetch`
+   integration with no SDK. No fine-tuning or RAG needed — the
    "knowledge" is the uploaded resume plus per-question ideal answers.
 3. **Where AI is used.** (a) Resume → candidate profile; (b) profile + role →
    personalized questions (technical, resume-based, behavioral, situational,
@@ -57,7 +58,7 @@ AI-generated personalized interview → Gemini feedback → results + dashboard.
    hedge improvement areas ("potential", "may explore"), concise fields,
    JSON-object-only output. Generation/difficulty/count are injected;
    evaluation additionally receives resume excerpts + target role.
-5. **Guardrails.** Key server-side only (`GEMINI_API_KEY`; browser calls
+5. **Guardrails.** Key server-side only (`GROQ_API_KEY`; browser calls
    same-origin `/api/*`); PDF magic-byte + 5 MB + 200-char readability checks;
    generated questions re-validated in code (options contain the correct
    answer, else dropped); scores clamped 0–100 with defaulted fields; every

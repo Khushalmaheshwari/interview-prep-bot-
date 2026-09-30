@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [react(), tailwindcss()],
   server: {
     proxy: {
-      // Dev only: forward API calls to the backend proxy (holds the Gemini key).
+      // Dev only: forward API calls to the backend proxy (holds the Groq key).
       "/api": "http://localhost:3001",
     },
   },

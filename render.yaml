@@ -1,8 +1,8 @@
 # Render hosting config (free Web Service).
 # In Render: New → Web Service → connect your repo.
 # Root Directory: quiz-app (or leave empty if you push only quiz-app/).
-# Add GEMINI_API_KEY in the dashboard (Environment tab) — never commit it.
-# Get a key at https://aistudio.google.com (free tier available).
+# Add GROQ_API_KEY in the dashboard (Environment tab) — never commit it.
+# Get a key at https://console.groq.com (free tier available).
 services:
   - type: web
     name: interview-prep-bot
@@ -11,7 +11,7 @@ services:
     buildCommand: npm install --include=dev && npm run build
     startCommand: npm run start
     envVars:
-      - key: GEMINI_MODEL
-        value: gemini-3.6-flash
-      - key: GEMINI_API_KEY
+      - key: GROQ_MODEL
+        value: openai/gpt-oss-20b
+      - key: GROQ_API_KEY
         sync: false

@@ -1,5 +1,5 @@
 /**
- * Gemini prompts + strict parsers for the personalized interview platform.
+ * Groq prompts + strict parsers for the personalized interview platform.
  *
  * Three AI jobs, all grounded in candidate-provided material:
  * 1. Resume analysis -> CandidateProfile (hedged improvement areas, never facts).
@@ -170,7 +170,7 @@ Respond with ONLY this JSON object:
 {"score": <0-100 integer>, "verdict": "<broadly correct | partially correct | incorrect>", "understood": "<what the candidate did well>", "missing": "<gaps, including technical/content gaps>", "explanation": "<short overall assessment>", "tip": "<one concrete improvement tip>", "stronger_answer": "<a stronger example answer>", "interview_tip": "<short interview tip>"}`;
 }
 
-/** Parse Gemini evaluation output. Strict contract + stronger fields. */
+/** Parse Groq evaluation output. Strict contract + stronger fields. */
 export function parseEvaluation(rawText) {
   const parsed = extractJson(rawText);
   if (!parsed || typeof parsed !== "object") return null;
