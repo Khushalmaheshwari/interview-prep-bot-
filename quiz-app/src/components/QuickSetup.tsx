@@ -66,11 +66,11 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
         are optional context.
       </p>
 
-      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Target role</p>
+      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Step 1 — Target role</p>
       <RolePicker value={role} onChange={setRole} />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Field label="🏢 Company (optional)">
+        <Field label="Step 2 — 🏢 Company (optional)">
           <input
             value={company}
             onChange={(e) => setCompany(e.target.value)}
@@ -90,7 +90,7 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
         </Field>
       </div>
 
-      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Difficulty</p>
+      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Step 3 — Difficulty</p>
       <div className="flex flex-wrap gap-2">
         {DIFFS.map((d) => (
           <button key={d} onClick={() => setDifficulty(d)} className={difficulty === d ? activeCls : idleCls}>
@@ -99,7 +99,7 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
         ))}
       </div>
 
-      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Number of questions</p>
+      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Step 4 — Number of questions</p>
       <CountInput value={count} onChange={setCount} />
 
       {generating ? (
