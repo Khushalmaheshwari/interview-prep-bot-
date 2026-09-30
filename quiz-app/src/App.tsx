@@ -45,6 +45,7 @@ export default function App() {
   const [resumeExcerpt, setResumeExcerpt] = useState("");
   const [resumeFileName, setResumeFileName] = useState("");
   const [role, setRole] = useState("Financial Analyst");
+  const [jdExcerpt, setJdExcerpt] = useState("");
   const [generating, setGenerating] = useState(false);
   const [generateError, setGenerateError] = useState<string | null>(null);
   const [lastBankConfig, setLastBankConfig] = useState<QuizConfig | null>(null);
@@ -66,15 +67,17 @@ export default function App() {
     setScreen("quiz");
   };
 
-  const startPersonalized = async (r: string, difficulty: Difficulty, count: number) => {
+  const startPersonalized = async (r: string, difficulty: Difficulty, count: number, jd: string) => {
     if (!profile || generating) return;
     setRole(r);
     setRunDifficulty(difficulty);
+    setJdExcerpt(jd);
     setGenerating(true);
     setGenerateError(null);
     const result = await generateInterview({
       profile,
       resumeExcerpt,
+      jdExcerpt: jd,
       role: r,
       difficulty,
       count,
@@ -87,15 +90,17 @@ export default function App() {
     }
   };
 
-  const startQuick = (questions: Question[], meta: { role: string; difficulty: Difficulty }) => {
+  const startQuick = (questions: Question[], meta: { role: string; difficulty: Difficulty; jdExcerpt: string }) => {
     setRole(meta.role);
     setRunDifficulty(meta.difficulty);
+    setJdExcerpt(meta.jdExcerpt);
     beginQuiz(questions, "quick");
   };
 
-  const startTopic = (questions: Question[], meta: { role: string; difficulty: Difficulty }) => {
+  const startTopic = (questions: Question[], meta: { role: string; difficulty: Difficulty; jdExcerpt: string }) => {
     setRole(meta.role);
     setRunDifficulty(meta.difficulty);
+    setJdExcerpt(meta.jdExcerpt);
     beginQuiz(questions, "topic");
   };
 
@@ -239,7 +244,12 @@ export default function App() {
             }}
             evalContext={
               personalized
-                ? { resumeContext: resumeExcerpt, role }
+                ? {
+                    resumeContext: [resumeExcerpt, jdExcerpt ? `Job description:\n${jdExcerpt}` : ""]
+                      .filter(Boolean)
+                      .join("\n\n"),
+                    role,
+                  }
                 : undefined
             }
           />

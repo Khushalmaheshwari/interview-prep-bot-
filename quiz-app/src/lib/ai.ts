@@ -71,10 +71,40 @@ export type GenerateResult =
   | { ok: true; questions: Question[] }
   | { ok: false; reason: string };
 
+export type JDResult =
+  | { ok: true; jdExcerpt: string; fileName: string }
+  | { ok: false; reason: string };
+
+/**
+ * Parse a job-description PDF into plain text (server-side extraction only —
+ * no AI call, no quota burn). Session-only, never stored.
+ */
+export async function parseJD(pdfBase64: string, fileName: string): Promise<JDResult> {
+  try {
+    const res = await fetch("/api/jd/parse", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ pdfBase64, fileName }),
+    });
+    const data = await res.json().catch(() => null);
+    if (data && data.ok && typeof data.jdExcerpt === "string") {
+      return {
+        ok: true,
+        jdExcerpt: data.jdExcerpt,
+        fileName: String(data.fileName || fileName),
+      };
+    }
+    return { ok: false, reason: (data && data.reason) || `http_${res.status}` };
+  } catch {
+    return { ok: false, reason: "network" };
+  }
+}
+
 /** Generate a personalized interview. Resume/profile optional (quick setup). */
 export async function generateInterview(input: {
   profile?: CandidateProfile | null;
   resumeExcerpt?: string;
+  jdExcerpt?: string;
   role?: string;
   company?: string;
   industry?: string;

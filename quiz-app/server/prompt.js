@@ -76,7 +76,7 @@ Rules:
 - Keep each field to 1-3 sentences.
 - Return ONLY the JSON object described below, on a single line with no line breaks. No markdown, no code fences, no extra keys.`;
 
-export function buildInterviewMessage({ profile, resumeExcerpt, role, company, industry, topicFocus, difficulty, count }) {
+export function buildInterviewMessage({ profile, resumeExcerpt, jdExcerpt, role, company, industry, topicFocus, difficulty, count }) {
   const hasResume = profile && typeof profile === "object" && Object.keys(profile).length > 0;
   const lines = [
     `Target role: ${role || "(general)"}`,
@@ -87,10 +87,13 @@ export function buildInterviewMessage({ profile, resumeExcerpt, role, company, i
     `Number of questions: ${count}`,
   ].filter(Boolean);
   const header = lines.join("\n");
+  const jdPart = jdExcerpt
+    ? `Job description requirements (shape technical/situational questions around these listed requirements and skills; do not invent requirements):\n${jdExcerpt}\n`
+    : "";
   const resumePart = hasResume
     ? `Candidate profile:\n${JSON.stringify(profile)}\n\nResume excerpts (do not go beyond these facts):\n${resumeExcerpt || "(none)"}\n\nGenerate a mix of technical, resume-based, behavioral, situational and scenario questions for this candidate and role.`
     : `No resume provided. Generate role-based technical, behavioral, situational and scenario questions (no resume-based questions).`;
-  return `${header}\n\n${resumePart}\nRespond with ONLY this JSON object:\n{"questions": [{"topic": "<short topic label>", "difficulty": "<Easy|Medium|Hard>", "type": "<mcq|true_false|scenario|behavioral>", "question": "<text>", "options": ["<A>", "<B>", "<C>", "<D>"], "correct_answer": "<one of options>", "explanation": "<why>", "interview_tip": "<tip>", "ideal_answer": "<for scenario/behavioral>", "evaluation_points": ["<point>"]}]}`;
+  return `${header}\n\n${jdPart}${resumePart}\nRespond with ONLY this JSON object:\n{"questions": [{"topic": "<short topic label>", "difficulty": "<Easy|Medium|Hard>", "type": "<mcq|true_false|scenario|behavioral>", "question": "<text>", "options": ["<A>", "<B>", "<C>", "<D>"], "correct_answer": "<one of options>", "explanation": "<why>", "interview_tip": "<tip>", "ideal_answer": "<for scenario/behavioral>", "evaluation_points": ["<point>"]}]}`;
 }
 
 const DIFFS = ["Easy", "Medium", "Hard"];

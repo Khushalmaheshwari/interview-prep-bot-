@@ -15,6 +15,7 @@ single demo user, resume processed in-session only.
   Engineering, HR, Sales, Operations…) + free-text "Other"
 - Personalized AI interviews: technical, resume-based, behavioral, situational
   and scenario questions generated per candidate, role and difficulty
+- Optional job-description PDF: questions shaped around the JD's requirements
 - Instant deterministic feedback on MCQ/True-False; Groq evaluation of
   open answers (score, verdict, strengths, gaps, stronger example, tip)
 - Results with per-question review + performance dashboard (averages, topic

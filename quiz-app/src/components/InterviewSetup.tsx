@@ -2,13 +2,14 @@ import { useState } from "react";
 import { friendlyError } from "../lib/ai";
 import { type Difficulty } from "../types";
 import CountInput from "./CountInput";
+import JDUpload, { type JDValue } from "./JDUpload";
 import RoleCombobox from "./RoleCombobox";
 
 interface Props {
   initialRole: string;
   generating: boolean;
   generateError: string | null;
-  onStart: (role: string, difficulty: Difficulty, count: number) => void;
+  onStart: (role: string, difficulty: Difficulty, count: number, jdExcerpt: string) => void;
   onClassic: () => void;
   onBack: () => void;
 }
@@ -26,6 +27,7 @@ export default function InterviewSetup({
   const [role, setRole] = useState(initialRole);
   const [difficulty, setDifficulty] = useState<Difficulty>("Medium");
   const [count, setCount] = useState<number>(5);
+  const [jd, setJd] = useState<JDValue | null>(null);
 
   const canStart = !generating && role.trim().length > 0 && role.trim().length <= 80;
 
@@ -55,6 +57,10 @@ export default function InterviewSetup({
       <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Number of questions</p>
       <CountInput value={count} onChange={setCount} />
 
+      <div className="mt-6">
+        <JDUpload value={jd} onChange={setJd} />
+      </div>
+
       {generating ? (
         <div className="mt-6 rounded-xl border border-indigo-800 bg-indigo-950 p-4 text-sm text-indigo-200">
           <p className="animate-pulse font-semibold">⚙️ Generating personalized interview questions…</p>
@@ -71,7 +77,7 @@ export default function InterviewSetup({
             Back
           </button>
           <button
-            onClick={() => role.trim() && onStart(role.trim(), difficulty, count)}
+            onClick={() => role.trim() && onStart(role.trim(), difficulty, count, jd?.excerpt || "")}
             disabled={!canStart}
             className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-950 hover:bg-indigo-500 disabled:opacity-40"
           >

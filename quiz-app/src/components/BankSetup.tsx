@@ -10,11 +10,15 @@ import {
   type Topic,
 } from "../types";
 import CountInput from "./CountInput";
+import JDUpload, { type JDValue } from "./JDUpload";
 import RoleCombobox from "./RoleCombobox";
 
 interface Props {
   onBankDone: (config: QuizConfig) => void;
-  onTopicDone: (questions: Question[], meta: { role: string; difficulty: Difficulty }) => void;
+  onTopicDone: (
+    questions: Question[],
+    meta: { role: string; difficulty: Difficulty; jdExcerpt: string }
+  ) => void;
   onBack: () => void;
 }
 
@@ -50,6 +54,7 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
   const [role, setRole] = useState<string>(DEFAULT_ROLE.Finance);
   const [aiDiff, setAiDiff] = useState<Difficulty>("Medium");
   const [aiCount, setAiCount] = useState<number>(5);
+  const [jd, setJd] = useState<JDValue | null>(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -69,12 +74,13 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
     const result = await generateInterview({
       role: cleanRole,
       topicFocus: broad,
+      jdExcerpt: jd?.excerpt || "",
       difficulty: aiDiff,
       count: aiCount,
     });
     setGenerating(false);
     if (result.ok) {
-      onTopicDone(result.questions, { role: cleanRole, difficulty: aiDiff });
+      onTopicDone(result.questions, { role: cleanRole, difficulty: aiDiff, jdExcerpt: jd?.excerpt || "" });
     } else {
       setError(result.reason);
     }
@@ -173,6 +179,10 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
 
           <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Number of questions</p>
           <CountInput value={aiCount} onChange={setAiCount} />
+
+          <div className="mt-6">
+            <JDUpload value={jd} onChange={setJd} />
+          </div>
 
           {generating ? (
             <div className="mt-6 rounded-xl border border-indigo-800 bg-indigo-950 p-4 text-sm text-indigo-200">

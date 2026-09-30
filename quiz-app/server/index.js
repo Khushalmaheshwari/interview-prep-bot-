@@ -48,6 +48,33 @@ app.get("/api/health", (_req, res) => {
 });
 
 // ------------------------------------------------------- resume analyze ---
+/** Extract readable text from a base64 PDF. Throws with reason on failure. */
+async function extractPdfText(pdfBase64, minChars) {
+  const bytes = Buffer.from(pdfBase64, "base64");
+  if (bytes.subarray(0, 5).toString() !== "%PDF-") {
+    const err = new Error("not_a_pdf");
+    err.reason = "not_a_pdf";
+    throw err;
+  }
+  let text = "";
+  try {
+    const { text: raw } = await extractText(new Uint8Array(bytes));
+    text = (Array.isArray(raw) ? raw.join("\n") : String(raw || "")).trim();
+  } catch (err) {
+    console.error("PDF extraction failed:", err?.message || err);
+    const e = new Error("unreadable");
+    e.reason = "unreadable";
+    throw e;
+  }
+  if (text.replace(/\s/g, "").length < minChars) {
+    // Scanned/image-only PDFs have (almost) no extractable text.
+    const err = new Error("unreadable");
+    err.reason = "unreadable";
+    throw err;
+  }
+  return text;
+}
+
 app.post("/api/resume/analyze", async (req, res) => {
   const { pdfBase64, fileName } = req.body || {};
   if (typeof pdfBase64 !== "string" || pdfBase64.length === 0) {
@@ -60,19 +87,9 @@ app.post("/api/resume/analyze", async (req, res) => {
 
   let text = "";
   try {
-    const bytes = Buffer.from(pdfBase64, "base64");
-    if (bytes.subarray(0, 5).toString() !== "%PDF-") {
-      return res.status(400).json({ ok: false, reason: "not_a_pdf" });
-    }
-    const { text: raw } = await extractText(new Uint8Array(bytes));
-    text = (Array.isArray(raw) ? raw.join("\n") : String(raw || "")).trim();
+    text = await extractPdfText(pdfBase64, 200);
   } catch (err) {
-    console.error("PDF extraction failed:", err?.message || err);
-    return res.status(400).json({ ok: false, reason: "unreadable" });
-  }
-  if (text.replace(/\s/g, "").length < 200) {
-    // Scanned/image-only PDFs have (almost) no extractable text.
-    return res.status(400).json({ ok: false, reason: "unreadable" });
+    return res.status(400).json({ ok: false, reason: err.reason || "unreadable" });
   }
 
   const result = await groqChat({
@@ -96,11 +113,33 @@ app.post("/api/resume/analyze", async (req, res) => {
   });
 });
 
+// ------------------------------------------------------------ jd parse ---
+// Pure text extraction for job-description PDFs (no AI call, no quota burn).
+app.post("/api/jd/parse", async (req, res) => {
+  const { pdfBase64, fileName } = req.body || {};
+  if (typeof pdfBase64 !== "string" || pdfBase64.length === 0) {
+    return res.status(400).json({ ok: false, reason: "no_file" });
+  }
+  if (pdfBase64.length > 8_000_000) {
+    return res.status(400).json({ ok: false, reason: "file_too_large" });
+  }
+  try {
+    const text = await extractPdfText(pdfBase64, 100);
+    return res.json({
+      ok: true,
+      jdExcerpt: text.slice(0, 3000),
+      fileName: typeof fileName === "string" ? fileName.slice(0, 120) : "",
+    });
+  } catch (err) {
+    return res.status(400).json({ ok: false, reason: err.reason || "unreadable" });
+  }
+});
+
 // ---------------------------------------------------- interview generate ---
 const DIFFS = ["Easy", "Medium", "Hard"];
 
 app.post("/api/interview/generate", async (req, res) => {
-  const { profile, resumeExcerpt, role, company, industry, topicFocus, difficulty, count } = req.body || {};
+  const { profile, resumeExcerpt, jdExcerpt, role, company, industry, topicFocus, difficulty, count } = req.body || {};
   // Resume is optional (quick setup without resume). Role or topic focus is required.
   const clean = (v) => (typeof v === "string" ? v.trim().slice(0, 80) : "");
   const r = clean(role);
@@ -120,6 +159,7 @@ app.post("/api/interview/generate", async (req, res) => {
       company: clean(company),
       industry: clean(industry),
       topicFocus: t,
+      jdExcerpt: String(jdExcerpt || "").slice(0, 3000),
       difficulty: diff,
       count: n,
       resumeExcerpt: String(resumeExcerpt || "").slice(0, 4000),

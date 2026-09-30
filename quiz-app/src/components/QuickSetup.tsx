@@ -2,10 +2,14 @@ import { useState } from "react";
 import { friendlyError, generateInterview } from "../lib/ai";
 import { type Difficulty, type Question } from "../types";
 import CountInput from "./CountInput";
+import JDUpload, { type JDValue } from "./JDUpload";
 import RoleCombobox from "./RoleCombobox";
 
 interface Props {
-  onDone: (questions: Question[], meta: { role: string; difficulty: Difficulty }) => void;
+  onDone: (
+    questions: Question[],
+    meta: { role: string; difficulty: Difficulty; jdExcerpt: string }
+  ) => void;
   onBack: () => void;
   onClassic: () => void;
 }
@@ -31,6 +35,7 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
   const [industry, setIndustry] = useState("");
   const [difficulty, setDifficulty] = useState<Difficulty>("Medium");
   const [count, setCount] = useState<number>(5);
+  const [jd, setJd] = useState<JDValue | null>(null);
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -45,12 +50,13 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
       role: cleanRole,
       company: company.trim(),
       industry: industry.trim(),
+      jdExcerpt: jd?.excerpt || "",
       difficulty,
       count,
     });
     setGenerating(false);
     if (result.ok) {
-      onDone(result.questions, { role: cleanRole, difficulty });
+      onDone(result.questions, { role: cleanRole, difficulty, jdExcerpt: jd?.excerpt || "" });
     } else {
       setError(result.reason);
     }
@@ -102,6 +108,10 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
 
       <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Number of questions</p>
       <CountInput value={count} onChange={setCount} />
+
+      <div className="mt-6">
+        <JDUpload value={jd} onChange={setJd} />
+      </div>
 
       {generating ? (
         <div className="mt-6 rounded-xl border border-indigo-800 bg-indigo-950 p-4 text-sm text-indigo-200">
