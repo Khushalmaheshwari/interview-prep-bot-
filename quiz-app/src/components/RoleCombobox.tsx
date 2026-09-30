@@ -24,6 +24,11 @@ export default function RoleCombobox({ value, onChange, placeholder }: Props) {
     roles: g.roles.filter((r) => r.toLowerCase().includes(q)),
   })).filter((g) => g.roles.length > 0);
 
+  const exactPreset = GROUPS.some((g) =>
+    g.roles.some((r) => r.toLowerCase() === q)
+  );
+  const showCustomRow = value.trim().length > 0 && !exactPreset;
+
   const close = () => setOpen(false);
 
   return (
@@ -46,12 +51,12 @@ export default function RoleCombobox({ value, onChange, placeholder }: Props) {
       />
       {open && (
         <div className="absolute z-10 mt-2 max-h-64 w-full overflow-y-auto rounded-xl border border-slate-700 bg-slate-900 p-2 shadow-2xl shadow-black/60">
-          {groups.length === 0 ? (
+          {groups.length === 0 && !showCustomRow && (
             <p className="px-3 py-2 text-sm text-slate-400">
-              No matches — press Enter to use “{value.trim()}”.
+              Type any role to use it.
             </p>
-          ) : (
-            groups.map((g) => (
+          )}
+          {groups.map((g) => (
               <div key={g.label} className="mb-1 last:mb-0">
                 <p className="px-3 pb-1 pt-2 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
                   {g.label}
@@ -72,7 +77,15 @@ export default function RoleCombobox({ value, onChange, placeholder }: Props) {
                   </button>
                 ))}
               </div>
-            ))
+            ))}
+          {showCustomRow && (
+            <button
+              onMouseDown={(e) => e.preventDefault()}
+              onClick={close}
+              className="mt-1 block w-full rounded-lg border border-dashed border-indigo-700 bg-indigo-950 px-3 py-2 text-left text-sm font-semibold text-indigo-200 hover:bg-indigo-900"
+            >
+              ➕ Use “{value.trim()}”
+            </button>
           )}
         </div>
       )}
