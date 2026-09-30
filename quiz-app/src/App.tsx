@@ -161,13 +161,8 @@ export default function App() {
                   Skip resume — quick setup
                 </button>
               </div>
-              <p className="mt-4">
-                <button
-                  onClick={() => setScreen("bank")}
-                  className="text-xs font-semibold text-slate-500 hover:text-slate-700"
-                >
-                  Or practice by topic from the question bank
-                </button>
+              <p className="mt-4 text-xs text-slate-400">
+                Resume stays in this session only — never stored or shared.
               </p>
             </section>
             <RecentSessions />
