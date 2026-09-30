@@ -1,8 +1,10 @@
 /** Shared bits for Vercel serverless API routes (no Express). */
 
 export function json(res, status, body) {
-  res.status(status).setHeader("Content-Type", "application/json");
-  res.send(JSON.stringify(body));
+  // Plain Node ServerResponse (Vercel) — no Express .status() here.
+  res.statusCode = status;
+  res.setHeader("Content-Type", "application/json");
+  res.end(JSON.stringify(body));
 }
 
 export function readBody(req) {
