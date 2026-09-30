@@ -27,7 +27,7 @@ export default function InterviewSetup({
   const [difficulty, setDifficulty] = useState<Difficulty>("Medium");
   const [count, setCount] = useState<number>(5);
 
-  const canStart = !generating && role.length > 0 && role.length <= 80;
+  const canStart = !generating && role.trim().length > 0 && role.trim().length <= 80;
 
   return (
     <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-black/30 sm:p-8">
@@ -71,7 +71,7 @@ export default function InterviewSetup({
             Back
           </button>
           <button
-            onClick={() => role && onStart(role, difficulty, count)}
+            onClick={() => role.trim() && onStart(role.trim(), difficulty, count)}
             disabled={!canStart}
             className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-950 hover:bg-indigo-500 disabled:opacity-40"
           >

@@ -1,5 +1,4 @@
 import { useRef, useState } from "react";
-
 interface Props {
   value: string;
   onChange: (role: string) => void;
@@ -17,6 +16,7 @@ const GROUPS: { label: string; roles: string[] }[] = [
 export default function RoleCombobox({ value, onChange, placeholder }: Props) {
   const [open, setOpen] = useState(false);
   const boxRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const q = value.trim().toLowerCase();
 
   const groups = GROUPS.map((g) => ({
@@ -34,6 +34,7 @@ export default function RoleCombobox({ value, onChange, placeholder }: Props) {
   return (
     <div ref={boxRef} className="relative">
       <input
+        ref={inputRef}
         value={value}
         onChange={(e) => {
           onChange(e.target.value);
@@ -87,6 +88,13 @@ export default function RoleCombobox({ value, onChange, placeholder }: Props) {
               ➕ Use “{value.trim()}”
             </button>
           )}
+          <button
+            onMouseDown={(e) => e.preventDefault()}
+            onClick={() => inputRef.current?.focus()}
+            className="mt-1 block w-full rounded-lg border border-slate-700 px-3 py-2 text-left text-sm font-semibold text-slate-300 hover:bg-slate-800"
+          >
+            ✏️ Others — type your own role above
+          </button>
         </div>
       )}
     </div>

@@ -34,14 +34,15 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
   const [generating, setGenerating] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
-  const canStart = !generating && role.length > 0;
+  const canStart = !generating && role.trim().length > 0;
 
   const start = async () => {
     if (!canStart) return;
+    const cleanRole = role.trim();
     setGenerating(true);
     setError(null);
     const result = await generateInterview({
-      role,
+      role: cleanRole,
       company: company.trim(),
       industry: industry.trim(),
       difficulty,
@@ -49,7 +50,7 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
     });
     setGenerating(false);
     if (result.ok) {
-      onDone(result.questions, { role, difficulty });
+      onDone(result.questions, { role: cleanRole, difficulty });
     } else {
       setError(result.reason);
     }
@@ -67,7 +68,7 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
       </p>
 
       <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Target role</p>
-      <RoleCombobox value={role} onChange={(r) => setRole(r.trim())} placeholder="Type a role, e.g. Marketing Analyst" />
+      <RoleCombobox value={role} onChange={setRole} placeholder="Type a role, e.g. Marketing Analyst" />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <Field label="🏢 Company (optional)">

@@ -62,18 +62,19 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
   };
 
   const startTopicQuiz = async () => {
-    if (generating || !role) return;
+    const cleanRole = role.trim();
+    if (generating || !cleanRole) return;
     setGenerating(true);
     setError(null);
     const result = await generateInterview({
-      role,
+      role: cleanRole,
       topicFocus: broad,
       difficulty: aiDiff,
       count: aiCount,
     });
     setGenerating(false);
     if (result.ok) {
-      onTopicDone(result.questions, { role, difficulty: aiDiff });
+      onTopicDone(result.questions, { role: cleanRole, difficulty: aiDiff });
     } else {
       setError(result.reason);
     }
@@ -185,7 +186,7 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
               </button>
               <button
                 onClick={startTopicQuiz}
-                disabled={!role}
+                disabled={!role.trim()}
                 className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-950 hover:bg-indigo-500 disabled:opacity-40"
               >
                 🚀 Start Quiz
