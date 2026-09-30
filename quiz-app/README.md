@@ -95,6 +95,18 @@ quiz-app/
 
 Docs for the evaluation: `../PROJECT_REPORT.md`, `../DEMO_SCRIPT.md`.
 
+## Deploy to Vercel
+
+1. Push this repo to GitHub.
+2. Vercel → Add New Project → import the repo, **Root Directory: `quiz-app`**
+   (Framework: Vite is auto-detected; `vercel.json` sets the rest).
+3. Environment variables: `GROQ_API_KEY` (= your key), `GROQ_MODEL`
+   (= `openai/gpt-oss-20b`).
+4. Deploy → share the `https://<project>.vercel.app` URL.
+
+Same-origin `/api/*` routes run as serverless functions (`api/`), so the key
+stays server-side. Local dev still uses the Express server (`npm run server`).
+
 ## Important limitations
 
 - Groq API needs a key (free tier at console.groq.com); without one AI features fall back.

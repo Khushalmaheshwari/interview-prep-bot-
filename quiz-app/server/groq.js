@@ -30,10 +30,11 @@ export async function groqChat({ system, user, maxTokens = 1200, temperature = 0
     ],
   });
 
-  // Retries on 503/529 (overloaded): capacity flaps, a later attempt
-  // seconds later often succeeds. Never retry 429 (rate limit).
-  const waits = [8000, 20000];
-  for (let attempt = 1; attempt <= 3; attempt++) {
+  // One retry on 503/529 (overloaded): capacity flaps, a later attempt
+  // often succeeds. Never retry 429 (rate limit). Kept short so Vercel's
+  // serverless timeout is never hit.
+  const waits = [5000];
+  for (let attempt = 1; attempt <= 2; attempt++) {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), timeoutMs);
     try {
@@ -52,7 +53,7 @@ export async function groqChat({ system, user, maxTokens = 1200, temperature = 0
         console.error("Groq rate-limited:", await response.text().catch(() => ""));
         return { ok: false, reason: "quota" };
       }
-      if ((response.status === 503 || response.status === 529) && attempt < 3) {
+      if ((response.status === 503 || response.status === 529) && attempt < 2) {
         const wait = waits[attempt - 1];
         console.warn(`Groq ${response.status} — retrying in ${wait / 1000}s…`);
         await new Promise((r) => setTimeout(r, wait));
