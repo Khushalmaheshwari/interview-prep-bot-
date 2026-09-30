@@ -55,28 +55,6 @@ export default function Dashboard({ sessions, onPractice, onSetup }: Props) {
         </div>
       </div>
 
-      <div className="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
-        <h3 className="text-lg font-bold">Topic Performance</h3>
-        <ul className="mt-4 space-y-3">
-          {data.topics.map((t) => (
-            <li key={t.topic}>
-              <div className="flex items-center justify-between text-sm">
-                <span className="font-medium">{t.topic}</span>
-                <span className="text-slate-500">
-                  {t.answered === 0 ? "not attempted" : `${t.pct}% · ${t.correct}/${t.answered}`}
-                </span>
-              </div>
-              <div className="mt-1 h-2 overflow-hidden rounded-full bg-slate-100">
-                <div
-                  className={`h-full rounded-full ${t.answered === 0 ? "" : t.pct >= 60 ? "bg-green-500" : t.pct >= 40 ? "bg-amber-500" : "bg-red-500"}`}
-                  style={{ width: `${t.answered === 0 ? 0 : t.pct}%` }}
-                />
-              </div>
-            </li>
-          ))}
-        </ul>
-      </div>
-
       {data.weakest && data.recommendation && (
         <div className="rounded-2xl border border-amber-200 bg-amber-50 p-6 shadow-sm sm:p-8">
           <h3 className="text-lg font-bold">
