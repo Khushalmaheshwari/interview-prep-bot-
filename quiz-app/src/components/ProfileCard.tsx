@@ -13,6 +13,43 @@ export default function ProfileCard({ profile }: { profile: CandidateProfile }) 
         Review this before starting — your interview will be built around it.
       </p>
 
+      {profile.readiness && (
+        <div className="mt-6 rounded-xl border border-violet-900 bg-gradient-to-br from-violet-950 to-slate-900 p-4">
+          <div className="flex items-center gap-4">
+            <div className="relative h-20 w-20 shrink-0">
+              <svg viewBox="0 0 80 80" className="h-20 w-20 -rotate-90">
+                <circle cx={40} cy={40} r={34} fill="none" stroke="#1e293b" strokeWidth={9} />
+                <circle
+                  cx={40}
+                  cy={40}
+                  r={34}
+                  fill="none"
+                  stroke="#8b5cf6"
+                  strokeWidth={9}
+                  strokeLinecap="round"
+                  strokeDasharray={`${(profile.readiness.score / 100) * 2 * Math.PI * 34} ${2 * Math.PI * 34}`}
+                />
+              </svg>
+              <span className="absolute inset-0 flex items-center justify-center text-lg font-extrabold text-white">
+                {profile.readiness.score}
+              </span>
+            </div>
+            <div className="text-sm">
+              <p className="font-bold text-violet-200">📊 Interview readiness</p>
+              {profile.readiness.fixes.length > 0 ? (
+                <ul className="mt-1 list-disc space-y-0.5 pl-5 text-slate-300">
+                  {profile.readiness.fixes.map((f, i) => (
+                    <li key={`${f}-${i}`}>{f}</li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="mt-1 text-slate-400">Solid base — keep practicing.</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
         <ProfileBlock title="💪 Strengths" tone="green" items={profile.strengths} empty="No clear strengths extracted — the interview will stay general." />
         <div className="rounded-xl border border-amber-800 bg-amber-950 p-4">

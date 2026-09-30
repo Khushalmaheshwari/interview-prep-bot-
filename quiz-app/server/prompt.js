@@ -36,7 +36,7 @@ export function buildResumeMessage(resumeText) {
 ${resumeText}
 
 Respond with ONLY this JSON object:
-{"name": "<candidate name or ''>", "education": ["<degree/school>"], "skills": ["<skill>"], "strengths": ["<strength with evidence>"], "improvement_areas": ["<hedged potential area>"], "experience_highlights": ["<role/project highlight>"], "likely_angles": ["<angle an interviewer may probe>"]}`;
+{"name": "<candidate name or ''>", "education": ["<degree/school>"], "skills": ["<skill>"], "strengths": ["<strength with evidence>"], "improvement_areas": ["<hedged potential area>"], "experience_highlights": ["<role/project highlight>"], "likely_angles": ["<angle an interviewer may probe>"], "readiness": {"score": <0-100 interview-readiness>, "fixes": ["<highest-impact fix, max 3>"]}}`;
 }
 
 const strList = (v) =>
@@ -45,6 +45,7 @@ const strList = (v) =>
 export function parseProfile(rawText) {
   const p = extractJson(rawText);
   if (!p || typeof p !== "object") return null;
+  const r = p.readiness && typeof p.readiness === "object" ? p.readiness : null;
   return {
     name: String(p.name || "").slice(0, 120),
     education: strList(p.education),
@@ -53,6 +54,12 @@ export function parseProfile(rawText) {
     improvement_areas: strList(p.improvement_areas),
     experience_highlights: strList(p.experience_highlights),
     likely_angles: strList(p.likely_angles),
+    readiness: r
+      ? {
+          score: Math.max(0, Math.min(100, Math.round(Number(r.score) || 0))),
+          fixes: strList(r.fixes).slice(0, 3),
+        }
+      : null,
   };
 }
 

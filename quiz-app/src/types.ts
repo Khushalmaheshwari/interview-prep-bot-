@@ -81,6 +81,8 @@ export interface CandidateProfile {
   experience_highlights: string[];
   /** Angles an interviewer is likely to probe. */
   likely_angles: string[];
+  /** Interview-readiness score + highest-impact fixes (absent in older profiles). */
+  readiness?: { score: number; fixes: string[] } | null;
 }
 
 /** What the interview is tailored to. */

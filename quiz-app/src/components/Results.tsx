@@ -97,6 +97,8 @@ export default function Results({ questions, answers, config, difficulty, role, 
             ` · ${score.scenarioCount} open answer(s) evaluated by AI, excluded from auto-score.`}
         </p>
 
+        <SectionSplit questions={questions} answers={answers} />
+
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
             onClick={onRetake}
@@ -215,6 +217,57 @@ export default function Results({ questions, answers, config, difficulty, role, 
         )}
       </div>
     </section>
+  );
+}
+
+/** Technical vs Behavioral/HR vs Scenario split for this interview. */
+function SectionSplit({ questions, answers }: { questions: Question[]; answers: AnswerRecord[] }) {
+  const byId = new Map(questions.map((q) => [q.id, q]));
+  const buckets: Record<string, { correct: number; total: number }> = {
+    Technical: { correct: 0, total: 0 },
+    "Behavioral & HR": { correct: 0, total: 0 },
+    "Scenario / Applied": { correct: 0, total: 0 },
+  };
+  for (const a of answers) {
+    const q = byId.get(a.questionId);
+    if (!q) continue;
+    const key =
+      q.type === "mcq" || q.type === "true_false"
+        ? "Technical"
+        : q.type === "behavioral"
+          ? "Behavioral & HR"
+          : "Scenario / Applied";
+    const verdict =
+      a.correct !== null ? a.correct : a.ai ? a.ai.score >= AI_PASS_SCORE : null;
+    if (verdict === null) continue;
+    buckets[key].total += 1;
+    if (verdict) buckets[key].correct += 1;
+  }
+  const order = ["Technical", "Behavioral & HR", "Scenario / Applied"];
+  const shown = order.filter((k) => buckets[k].total > 0);
+  if (shown.length === 0) return null;
+  const icons: Record<string, string> = {
+    Technical: "🧠",
+    "Behavioral & HR": "🤝",
+    "Scenario / Applied": "📊",
+  };
+  return (
+    <div className="mx-auto mt-6 grid max-w-lg grid-cols-3 gap-3 text-sm">
+      {shown.map((k) => {
+        const b = buckets[k];
+        const pct = Math.round((b.correct / b.total) * 100);
+        return (
+          <div key={k} className="rounded-xl bg-slate-800 px-3 py-3">
+            <p className="text-base font-extrabold text-white">
+              {icons[k]} {pct}%
+            </p>
+            <p className="mt-1 text-xs text-slate-400">
+              {k} · {b.correct}/{b.total}
+            </p>
+          </div>
+        );
+      })}
+    </div>
   );
 }
 

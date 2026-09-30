@@ -8,6 +8,7 @@ import type {
   Question,
   OpenQuestion,
 } from "../types";
+import MicButton from "./MicButton";
 
 interface Props {
   questions: Question[];
@@ -165,6 +166,9 @@ export default function QuizRunner({ questions, onFinish, onExit, evalContext }:
             <p className="mt-1 text-xs text-slate-500">
               Open-ended question — AI will evaluate your answer after you submit.
             </p>
+            {!submitted && (
+              <MicButton value={text} onChange={setText} disabled={submitted} />
+            )}
           </div>
         )}
 
