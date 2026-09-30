@@ -139,8 +139,6 @@ export const DIFFICULTIES: (Difficulty | "Mixed")[] = [
   "Mixed",
 ];
 
-export const QUESTION_COUNTS = [5, 10] as const;
-
 export const ROLE_SUGGESTIONS = [
   "Financial Analyst",
   "Investment Banking Analyst",

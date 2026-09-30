@@ -55,6 +55,19 @@ export default function Dashboard({ sessions, onPractice, onSetup }: Props) {
         </div>
       </div>
 
+      <div className="grid gap-6 sm:grid-cols-5">
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-black/30 sm:col-span-3">
+          <h3 className="text-lg font-bold text-white">📈 Score trend</h3>
+          <p className="text-xs text-slate-500">Quiz score over time (oldest → newest)</p>
+          <ScoreTrend sessions={sessions} />
+        </div>
+        <div className="rounded-2xl border border-slate-800 bg-slate-900 p-6 text-center shadow-xl shadow-black/30 sm:col-span-2">
+          <h3 className="text-lg font-bold text-white">🎯 Accuracy</h3>
+          <p className="text-xs text-slate-500">All objective answers</p>
+          <AccuracyDonut sessions={sessions} />
+        </div>
+      </div>
+
       {data.weakest && data.recommendation && (
         <div className="rounded-2xl border border-amber-800 bg-gradient-to-br from-amber-950 to-slate-900 p-6 shadow-xl shadow-black/30 sm:p-8">
           <h3 className="text-lg font-bold text-white">
@@ -114,6 +127,91 @@ function BigStat({ label, value }: { label: string; value: string }) {
     <div className="rounded-xl bg-slate-800 px-3 py-4">
       <p className="text-2xl font-extrabold text-white">{value}</p>
       <p className="mt-1 text-xs text-slate-400">{label}</p>
+    </div>
+  );
+}
+
+function shortDate(iso: string): string {
+  try {
+    const d = new Date(iso);
+    return `${d.getDate()}/${d.getMonth() + 1}`;
+  } catch {
+    return "";
+  }
+}
+
+/** Bar chart of session scores, chronological, last 10. Pure SVG, no deps. */
+function ScoreTrend({ sessions }: { sessions: QuizSession[] }) {
+  const last = [...sessions].reverse().slice(-10);
+  const W = 320;
+  const H = 130;
+  const GAP = 6;
+  const bw = (W - GAP * (last.length - 1)) / Math.max(last.length, 1);
+  return (
+    <svg viewBox={`0 0 ${W} ${H}`} className="mt-3 w-full" role="img" aria-label="Score trend chart">
+      {[25, 50, 75].map((g) => (
+        <line
+          key={g}
+          x1={0}
+          x2={W}
+          y1={H - 18 - (g / 100) * (H - 30)}
+          y2={H - 18 - (g / 100) * (H - 30)}
+          stroke="#1e293b"
+          strokeWidth={1}
+        />
+      ))}
+      {last.map((s, i) => {
+        const h = Math.max(4, (s.pct / 100) * (H - 30));
+        const x = i * (bw + GAP);
+        const color = s.pct >= 60 ? "#6366f1" : s.pct >= 40 ? "#f59e0b" : "#f43f5e";
+        return (
+          <g key={s.id}>
+            <title>{`${shortDate(s.date)} — ${s.pct}%`}</title>
+            <rect x={x} y={H - 18 - h} width={bw} height={h} rx={3} fill={color} />
+            <text x={x + bw / 2} y={H - 5} textAnchor="middle" fontSize={8} fill="#64748b">
+              {shortDate(s.date)}
+            </text>
+          </g>
+        );
+      })}
+    </svg>
+  );
+}
+
+/** Donut of total correct vs incorrect objective answers. Pure SVG. */
+function AccuracyDonut({ sessions }: { sessions: QuizSession[] }) {
+  const correct = sessions.reduce((n, s) => n + s.correct, 0);
+  const total = sessions.reduce((n, s) => n + s.total, 0);
+  const pct = total === 0 ? 0 : Math.round((correct / total) * 100);
+  const R = 44;
+  const C = 2 * Math.PI * R;
+  return (
+    <div className="mt-3 flex items-center justify-center gap-4">
+      <svg width={110} height={110} viewBox="0 0 110 110" role="img" aria-label="Accuracy donut">
+        <circle cx={55} cy={55} r={R} fill="none" stroke="#1e293b" strokeWidth={12} />
+        <circle
+          cx={55}
+          cy={55}
+          r={R}
+          fill="none"
+          stroke="#6366f1"
+          strokeWidth={12}
+          strokeLinecap="round"
+          strokeDasharray={`${(pct / 100) * C} ${C}`}
+          transform="rotate(-90 55 55)"
+        />
+        <text x={55} y={60} textAnchor="middle" fontSize={18} fontWeight={800} fill="#fff">
+          {pct}%
+        </text>
+      </svg>
+      <div className="text-left text-xs text-slate-400">
+        <p>
+          <span className="font-bold text-emerald-300">{correct}</span> correct
+        </p>
+        <p>
+          <span className="font-bold text-rose-300">{total - correct}</span> missed
+        </p>
+      </div>
     </div>
   );
 }

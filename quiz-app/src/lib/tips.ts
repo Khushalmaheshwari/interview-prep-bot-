@@ -1,11 +1,11 @@
-/** Short role-wise interview tips shown on setup screens. */
+/** Short general + role-wise interview tips. */
 
 interface RoleTips {
   dos: string[];
   donts: string[];
 }
 
-const GENERAL: RoleTips = {
+export const GENERAL_TIPS: RoleTips = {
   dos: [
     "Structure answers: situation → action → result.",
     "Quantify impact wherever you can (%, ₹, timelines).",
@@ -117,9 +117,12 @@ const BY_ROLE: Record<string, RoleTips> = {
   },
 };
 
+/** All role-specific tips (for the Tips page). */
+export const ROLE_TIPS: Record<string, RoleTips> = BY_ROLE;
+
 export function tipsFor(role: string): RoleTips {
   const key = Object.keys(BY_ROLE).find(
     (k) => k.toLowerCase() === role.trim().toLowerCase()
   );
-  return key ? BY_ROLE[key] : GENERAL;
+  return key ? BY_ROLE[key] : GENERAL_TIPS;
 }

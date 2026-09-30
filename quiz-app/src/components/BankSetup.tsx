@@ -3,14 +3,13 @@ import { friendlyError, generateInterview } from "../lib/ai";
 import { countBy } from "../lib/quiz";
 import {
   DIFFICULTIES,
-  QUESTION_COUNTS,
   TOPICS,
   type Difficulty,
   type Question,
   type QuizConfig,
   type Topic,
 } from "../types";
-import InterviewTips from "./InterviewTips";
+import CountInput from "./CountInput";
 import RolePicker from "./RolePicker";
 
 interface Props {
@@ -128,14 +127,8 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
             ))}
           </div>
 
-          <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Questions</p>
-          <div className="flex gap-2">
-            {QUESTION_COUNTS.map((n) => (
-              <button key={n} onClick={() => setBankCount(n)} className={bankCount === n ? activeCls : idleCls}>
-                {n}
-              </button>
-            ))}
-          </div>
+          <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Number of questions</p>
+          <CountInput value={bankCount} onChange={setBankCount} />
 
           <div className="mt-6 rounded-xl bg-slate-800 p-4 text-sm text-slate-300">
             <p>
@@ -177,16 +170,8 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
             ))}
           </div>
 
-          <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Questions</p>
-          <div className="flex gap-2">
-            {QUESTION_COUNTS.map((n) => (
-              <button key={n} onClick={() => setAiCount(n)} className={aiCount === n ? activeCls : idleCls}>
-                {n}
-              </button>
-            ))}
-          </div>
-
-          <InterviewTips role={role} />
+          <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Number of questions</p>
+          <CountInput value={aiCount} onChange={setAiCount} />
 
           {generating ? (
             <div className="mt-6 rounded-xl border border-indigo-800 bg-indigo-950 p-4 text-sm text-indigo-200">

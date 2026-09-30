@@ -8,6 +8,7 @@ import QuickSetup from "./components/QuickSetup";
 import QuizRunner from "./components/QuizRunner";
 import Results from "./components/Results";
 import ResumeUpload from "./components/ResumeUpload";
+import TipsPage from "./components/TipsPage";
 import { generateInterview } from "./lib/ai";
 import { loadSessions } from "./lib/history";
 import { selectQuestions } from "./lib/quiz";
@@ -29,7 +30,8 @@ type Screen =
   | "bank"
   | "quiz"
   | "results"
-  | "dashboard";
+  | "dashboard"
+  | "tips";
 
 /** Where the current quiz came from (drives Back/Retake routing). */
 type Flow = "resume" | "quick" | "topic" | "bank";
@@ -127,6 +129,9 @@ export default function App() {
           <nav className="flex gap-2 text-sm">
             <NavBtn active={screen === "home"} onClick={() => setScreen("home")}>
               Home
+            </NavBtn>
+            <NavBtn active={screen === "tips"} onClick={() => setScreen("tips")}>
+              Tips
             </NavBtn>
             <NavBtn active={screen === "dashboard"} onClick={openDashboard}>
               Performance
@@ -265,6 +270,8 @@ export default function App() {
             onSetup={() => setScreen("home")}
           />
         )}
+
+        {screen === "tips" && <TipsPage />}
       </main>
 
       <footer className="mx-auto max-w-4xl px-6 pb-10 text-center text-xs text-slate-500">
