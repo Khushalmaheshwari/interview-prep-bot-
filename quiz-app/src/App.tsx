@@ -1,6 +1,7 @@
 import { useState } from "react";
 import BankSetup from "./components/BankSetup";
 import Dashboard from "./components/Dashboard";
+import HomeStats from "./components/HomeStats";
 import InterviewSetup from "./components/InterviewSetup";
 import ProfileCard from "./components/ProfileCard";
 import QuickSetup from "./components/QuickSetup";
@@ -116,12 +117,12 @@ export default function App() {
     flow === "resume" ? "profile" : flow === "quick" ? "quick" : "bank";
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-900">
-      <header className="border-b bg-white">
+    <div className="min-h-screen bg-slate-950 text-slate-100">
+      <header className="border-b border-slate-800 bg-slate-900/80 backdrop-blur">
         <div className="mx-auto flex max-w-4xl items-center justify-between px-6 py-4">
           <button className="text-left" onClick={() => setScreen("home")}>
-            <p className="text-lg font-bold">AI Interview Prep</p>
-            <p className="text-xs text-slate-500">Personalized interview practice</p>
+            <p className="text-lg font-bold text-white">🎯 AI Interview Prep</p>
+            <p className="text-xs text-slate-400">Personalized interview practice</p>
           </button>
           <nav className="flex gap-2 text-sm">
             <NavBtn active={screen === "home"} onClick={() => setScreen("home")}>
@@ -137,12 +138,17 @@ export default function App() {
       <main className="mx-auto max-w-4xl px-6 py-10">
         {screen === "home" && (
           <>
-            <section className="rounded-2xl bg-white p-10 text-center shadow-sm">
-              <h1 className="text-4xl font-extrabold">AI Interview Prep</h1>
-              <p className="mt-2 text-lg text-slate-600">
+            <section className="overflow-hidden rounded-2xl border border-indigo-900 bg-gradient-to-br from-indigo-950 via-slate-900 to-slate-900 p-10 text-center shadow-xl shadow-black/40">
+              <p className="text-sm font-semibold uppercase tracking-widest text-indigo-400">
+                ✨ AI-powered mock interviews
+              </p>
+              <h1 className="mt-2 bg-gradient-to-r from-white via-indigo-200 to-violet-300 bg-clip-text text-4xl font-extrabold text-transparent sm:text-5xl">
+                AI Interview Prep
+              </h1>
+              <p className="mt-3 text-lg text-slate-300">
                 Prepare smarter. Interview better.
               </p>
-              <p className="mx-auto mt-4 max-w-xl text-sm text-slate-600">
+              <p className="mx-auto mt-4 max-w-xl text-sm text-slate-400">
                 Upload your resume for a fully personalized interview — or skip
                 it and practice by role or topic. Every open answer gets AI
                 feedback.
@@ -150,22 +156,22 @@ export default function App() {
               <div className="mt-6 flex flex-wrap justify-center gap-3">
                 <button
                   onClick={() => setScreen("upload")}
-                  className="rounded-xl bg-indigo-600 px-8 py-3 font-semibold text-white hover:bg-indigo-700"
+                  className="rounded-xl bg-indigo-600 px-8 py-3 font-semibold text-white shadow-lg shadow-indigo-950 hover:bg-indigo-500"
                 >
-                  Upload Resume
+                  📄 Upload Resume
                 </button>
                 <button
                   onClick={() => setScreen("quick")}
-                  className="rounded-xl border px-6 py-3 text-sm font-semibold hover:bg-slate-50"
+                  className="rounded-xl border border-slate-700 bg-slate-800/60 px-6 py-3 text-sm font-semibold text-slate-100 hover:bg-slate-800"
                 >
-                  Skip resume — quick setup
+                  ⚡ Skip resume — quick setup
                 </button>
               </div>
-              <p className="mt-4 text-xs text-slate-400">
+              <p className="mt-4 text-xs text-slate-500">
                 Resume stays in this session only — never stored or shared.
               </p>
             </section>
-            <RecentSessions />
+            <HomeStats />
           </>
         )}
 
@@ -194,7 +200,7 @@ export default function App() {
               onBack={() => setScreen("upload")}
             />
             {resumeFileName && (
-              <p className="text-center text-xs text-slate-400">
+              <p className="text-center text-xs text-slate-500">
                 Profile built from {resumeFileName} · kept in this session only.
               </p>
             )}
@@ -261,34 +267,10 @@ export default function App() {
         )}
       </main>
 
-      <footer className="mx-auto max-w-4xl px-6 pb-10 text-center text-xs text-slate-400">
+      <footer className="mx-auto max-w-4xl px-6 pb-10 text-center text-xs text-slate-500">
         Practice. Learn. Improve. — your resume stays in this session only.
       </footer>
     </div>
-  );
-}
-
-/** Compact list of recent saved sessions on Home (plain history, no analytics). */
-function RecentSessions() {
-  const [sessions] = useState<QuizSession[]>(() => loadSessions().slice(0, 5));
-  if (sessions.length === 0) return null;
-  return (
-    <section className="mt-6 rounded-2xl bg-white p-6 shadow-sm sm:p-8">
-      <h3 className="text-base font-bold">Recent sessions (this device)</h3>
-      <ul className="mt-3 space-y-2 text-sm">
-        {sessions.map((s) => (
-          <li
-            key={s.id}
-            className="flex items-center justify-between rounded-xl bg-slate-50 px-4 py-2.5"
-          >
-            <span className="text-slate-600">
-              {s.role || s.topic} · {s.difficulty}
-            </span>
-            <span className="font-bold">{s.pct}%</span>
-          </li>
-        ))}
-      </ul>
-    </section>
   );
 }
 
@@ -306,8 +288,8 @@ function NavBtn({
       onClick={onClick}
       className={
         active
-          ? "rounded-lg bg-slate-900 px-3 py-1.5 font-semibold text-white"
-          : "rounded-lg px-3 py-1.5 text-slate-600 hover:bg-slate-100"
+          ? "rounded-lg bg-indigo-600 px-3 py-1.5 font-semibold text-white"
+          : "rounded-lg px-3 py-1.5 text-slate-400 hover:bg-slate-800 hover:text-slate-200"
       }
     >
       {children}

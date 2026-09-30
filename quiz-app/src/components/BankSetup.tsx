@@ -10,6 +10,7 @@ import {
   type QuizConfig,
   type Topic,
 } from "../types";
+import InterviewTips from "./InterviewTips";
 import RolePicker from "./RolePicker";
 
 interface Props {
@@ -39,7 +40,7 @@ const DEFAULT_ROLE: Record<BroadTopic, string> = {
 const AI_DIFFS: Difficulty[] = ["Easy", "Medium", "Hard"];
 
 /**
- * Classic screen: Finance uses the offline bank (topic focus + difficulty);
+ * Topic screen: Finance uses the offline bank (topic focus + difficulty);
  * other broad topics generate an AI topic quiz, optionally shaped by a role.
  */
 export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
@@ -80,17 +81,17 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
   };
 
   return (
-    <section className="rounded-2xl bg-white p-6 shadow-sm sm:p-8">
-      <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">
-        Topic Quiz
+    <section className="rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-black/30 sm:p-8">
+      <p className="text-sm font-semibold uppercase tracking-widest text-indigo-400">
+        📚 Topic Quiz
       </p>
-      <h2 className="mt-1 text-2xl font-bold">Pick a topic to practice</h2>
-      <p className="mt-1 text-sm text-slate-600">
+      <h2 className="mt-1 text-2xl font-bold text-white">Pick a topic to practice</h2>
+      <p className="mt-1 text-sm text-slate-400">
         Finance runs on the offline question bank. Other topics generate a
         fresh AI quiz — shaped by the role below.
       </p>
 
-      <p className="mb-2 mt-6 text-sm font-semibold">Topic</p>
+      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Topic</p>
       <div className="flex flex-wrap gap-2">
         {BROAD_TOPICS.map((t) => (
           <button key={t} onClick={() => pickBroad(t)} className={broad === t ? activeCls : idleCls}>
@@ -101,7 +102,7 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
 
       {broad === "Finance" ? (
         <>
-          <p className="mb-2 mt-6 text-sm font-semibold">Focus area</p>
+          <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Focus area</p>
           <div className="flex flex-wrap gap-2">
             {TOPICS.map((t) => (
               <button
@@ -114,7 +115,7 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
             ))}
           </div>
 
-          <p className="mb-2 mt-6 text-sm font-semibold">Difficulty</p>
+          <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Difficulty</p>
           <div className="flex flex-wrap gap-2">
             {DIFFICULTIES.map((d) => (
               <button
@@ -127,7 +128,7 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
             ))}
           </div>
 
-          <p className="mb-2 mt-6 text-sm font-semibold">Questions</p>
+          <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Questions</p>
           <div className="flex gap-2">
             {QUESTION_COUNTS.map((n) => (
               <button key={n} onClick={() => setBankCount(n)} className={bankCount === n ? activeCls : idleCls}>
@@ -136,27 +137,27 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
             ))}
           </div>
 
-          <div className="mt-6 rounded-xl bg-slate-50 p-4 text-sm">
+          <div className="mt-6 rounded-xl bg-slate-800 p-4 text-sm text-slate-300">
             <p>
-              Available in bank: <strong>{available} questions</strong>
+              Available in bank: <strong className="text-white">{available} questions</strong>
               <span className="text-slate-500"> · works without AI</span>
             </p>
             {available === 0 && (
-              <p className="mt-1 font-medium text-red-600">No questions match — try “All” or “Mixed”.</p>
+              <p className="mt-1 font-medium text-rose-300">No questions match — try “All” or “Mixed”.</p>
             )}
             {available > 0 && available < bankCount && (
-              <p className="mt-1 text-amber-700">Only {available} available — you’ll get all of them.</p>
+              <p className="mt-1 text-amber-300">Only {available} available — you’ll get all of them.</p>
             )}
           </div>
 
           <div className="mt-6 flex gap-3">
-            <button onClick={onBack} className="rounded-xl border px-5 py-3 text-sm font-semibold hover:bg-slate-50">
+            <button onClick={onBack} className="rounded-xl border border-slate-700 px-5 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800">
               Back
             </button>
             <button
               onClick={() => onBankDone({ topic: focus, difficulty: bankDiff, count: bankCount })}
               disabled={available === 0}
-              className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40"
+              className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-950 hover:bg-indigo-500 disabled:opacity-40"
             >
               Start Quiz
             </button>
@@ -164,10 +165,10 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
         </>
       ) : (
         <>
-          <p className="mb-2 mt-6 text-sm font-semibold">Role (shapes the questions)</p>
+          <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Role (shapes the questions)</p>
           <RolePicker value={role} onChange={setRole} />
 
-          <p className="mb-2 mt-6 text-sm font-semibold">Difficulty</p>
+          <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Difficulty</p>
           <div className="flex flex-wrap gap-2">
             {AI_DIFFS.map((d) => (
               <button key={d} onClick={() => setAiDiff(d)} className={aiDiff === d ? activeCls : idleCls}>
@@ -176,7 +177,7 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
             ))}
           </div>
 
-          <p className="mb-2 mt-6 text-sm font-semibold">Questions</p>
+          <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Questions</p>
           <div className="flex gap-2">
             {QUESTION_COUNTS.map((n) => (
               <button key={n} onClick={() => setAiCount(n)} className={aiCount === n ? activeCls : idleCls}>
@@ -185,32 +186,34 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
             ))}
           </div>
 
+          <InterviewTips role={role} />
+
           {generating ? (
-            <div className="mt-6 rounded-xl bg-indigo-50 p-4 text-sm text-indigo-800">
-              <p className="animate-pulse font-semibold">Generating {broad} questions…</p>
-              <p className="mt-1 text-indigo-600">Tailoring them for {role || "your role"}…</p>
+            <div className="mt-6 rounded-xl border border-indigo-800 bg-indigo-950 p-4 text-sm text-indigo-200">
+              <p className="animate-pulse font-semibold">⚙️ Generating {broad} questions…</p>
+              <p className="mt-1 text-indigo-300">Tailoring them for {role || "your role"}…</p>
             </div>
           ) : (
             <div className="mt-6 flex gap-3">
-              <button onClick={onBack} className="rounded-xl border px-5 py-3 text-sm font-semibold hover:bg-slate-50">
+              <button onClick={onBack} className="rounded-xl border border-slate-700 px-5 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800">
                 Back
               </button>
               <button
                 onClick={startTopicQuiz}
                 disabled={!role}
-                className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-700 disabled:opacity-40"
+                className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-950 hover:bg-indigo-500 disabled:opacity-40"
               >
-                Start Quiz
+                🚀 Start Quiz
               </button>
             </div>
           )}
 
           {error && !generating && (
-            <div className="mt-4 rounded-xl border border-red-200 bg-red-50 p-4 text-sm">
-              <p className="font-semibold text-red-700">{friendlyError(error)}</p>
+            <div className="mt-4 rounded-xl border border-rose-800 bg-rose-950 p-4 text-sm">
+              <p className="font-semibold text-rose-200">{friendlyError(error)}</p>
               <button
                 onClick={() => pickBroad("Finance")}
-                className="mt-2 rounded-lg border px-4 py-2 text-xs font-semibold hover:bg-white"
+                className="mt-2 rounded-lg border border-rose-700 px-4 py-2 text-xs font-semibold text-rose-100 hover:bg-rose-900"
               >
                 Practice Finance offline instead
               </button>
@@ -228,5 +231,5 @@ function shortTopic(t: Topic): string {
   return t;
 }
 
-const activeCls = "rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white";
-const idleCls = "rounded-xl border bg-white px-4 py-2 text-sm hover:bg-slate-50";
+const activeCls = "rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-950";
+const idleCls = "rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800";

@@ -16,6 +16,28 @@ export function loadSessions(): QuizSession[] {
   }
 }
 
+/** Consecutive-day practice streak ending today or yesterday. */
+export function practiceStreak(): number {
+  const days = new Set(
+    loadSessions().map((s) => {
+      const d = new Date(s.date);
+      return `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
+    })
+  );
+  if (days.size === 0) return 0;
+  let streak = 0;
+  const cursor = new Date();
+  // Allow the streak to stay alive if today has no quiz yet.
+  const todayKey = `${cursor.getFullYear()}-${cursor.getMonth()}-${cursor.getDate()}`;
+  if (!days.has(todayKey)) cursor.setDate(cursor.getDate() - 1);
+  while (true) {
+    const key = `${cursor.getFullYear()}-${cursor.getMonth()}-${cursor.getDate()}`;
+    if (!days.has(key)) break;
+    streak += 1;
+    cursor.setDate(cursor.getDate() - 1);
+  }
+  return streak;
+}
 /** Append one session (dedupes by id), newest first, capped at MAX. */
 export function saveSession(session: QuizSession): QuizSession[] {
   const existing = loadSessions().filter((s) => s.id !== session.id);

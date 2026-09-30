@@ -40,7 +40,7 @@ export default function RolePicker({ value, onChange }: Props) {
           }}
           placeholder="Enter your role, e.g. Supply Chain Analyst"
           maxLength={80}
-          className="mt-3 w-full rounded-xl border px-4 py-2.5 text-sm outline-none focus:border-indigo-500 focus:ring-2 focus:ring-indigo-100"
+          className="mt-3 w-full rounded-xl border border-slate-700 bg-slate-800 px-4 py-2.5 text-sm text-slate-100 outline-none placeholder:text-slate-500 focus:border-indigo-500 focus:ring-2 focus:ring-indigo-500/30"
         />
       )}
     </div>
@@ -48,6 +48,6 @@ export default function RolePicker({ value, onChange }: Props) {
 }
 
 const activeCls =
-  "rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white";
+  "rounded-xl bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-lg shadow-indigo-950";
 const idleCls =
-  "rounded-xl border bg-white px-4 py-2 text-sm hover:bg-slate-50";
+  "rounded-xl border border-slate-700 bg-slate-900 px-4 py-2 text-sm text-slate-200 hover:bg-slate-800";

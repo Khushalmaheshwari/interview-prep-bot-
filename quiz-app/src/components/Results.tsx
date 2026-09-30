@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { AI_PASS_SCORE } from "../lib/dashboard";
 import { saveSession } from "../lib/history";
+import { downloadReport } from "../lib/export";
 import { scoreQuiz, isOpenEnded, typeLabel } from "../lib/quiz";
 import type { AnswerRecord, Difficulty, Question, QuizConfig, QuizSession, SessionDetail } from "../types";
 
@@ -73,12 +74,12 @@ export default function Results({ questions, answers, config, difficulty, role, 
 
   return (
     <section>
-      <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
-        <p className="text-sm font-semibold uppercase tracking-widest text-indigo-600">
-          Quiz Complete
+      <div className="rounded-2xl border border-slate-800 bg-slate-900 p-8 text-center shadow-xl shadow-black/30">
+        <p className="text-sm font-semibold uppercase tracking-widest text-indigo-400">
+          {score.pct >= 60 ? "🎉 Quiz Complete" : "Quiz Complete"}
         </p>
-        <p className="mt-2 text-5xl font-extrabold">{score.pct}%</p>
-        <p className="mt-2 text-sm text-slate-600">{message(score.pct)}</p>
+        <p className="mt-2 bg-gradient-to-r from-white to-indigo-300 bg-clip-text text-5xl font-extrabold text-transparent">{score.pct}%</p>
+        <p className="mt-2 text-sm text-slate-400">{message(score.pct)}</p>
 
         <div className="mx-auto mt-6 grid max-w-lg grid-cols-2 gap-3 text-sm sm:grid-cols-4">
           <Stat label="Questions" value={String(questions.length)} />
@@ -93,45 +94,53 @@ export default function Results({ questions, answers, config, difficulty, role, 
         <p className="mt-3 text-xs text-slate-500">
           Difficulty: {difficulty}
           {score.scenarioCount > 0 &&
-            ` · ${score.scenarioCount} scenario answer(s) evaluated by AI, excluded from auto-score.`}
+            ` · ${score.scenarioCount} open answer(s) evaluated by AI, excluded from auto-score.`}
         </p>
 
         <div className="mt-6 flex flex-wrap justify-center gap-3">
           <button
             onClick={onRetake}
-            className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white hover:bg-indigo-700"
+            className="rounded-xl bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-950 hover:bg-indigo-500"
           >
-            Retake Same Mix
+            🔁 Retake
           </button>
           <button
             onClick={onNewSetup}
-            className="rounded-xl border px-6 py-3 text-sm font-semibold hover:bg-slate-50"
+            className="rounded-xl border border-slate-700 px-6 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800"
           >
             New Setup
           </button>
           <button
+            onClick={() =>
+              downloadReport({ questions, answers, role, difficulty, date: new Date() })
+            }
+            className="rounded-xl border border-slate-700 px-6 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800"
+          >
+            ⬇ Download Report
+          </button>
+          <button
             onClick={onDashboard}
-            className="rounded-xl border px-6 py-3 text-sm font-semibold hover:bg-slate-50"
+            className="rounded-xl border border-slate-700 px-6 py-3 text-sm font-semibold text-slate-200 hover:bg-slate-800"
           >
             View Dashboard
           </button>
         </div>
       </div>
 
-      <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm sm:p-8">
-        <h3 className="text-lg font-bold">Review</h3>
+      <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-black/30 sm:p-8">
+        <h3 className="text-lg font-bold text-white">📝 Review</h3>
         <ol className="mt-4 space-y-4">
           {answers.map((a, i) => {
             const q = byId.get(a.questionId);
             if (!q) return null;
             return (
-              <li key={a.questionId + i} className="rounded-xl border p-4 text-sm">
-                <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">
+              <li key={a.questionId + i} className="rounded-xl border border-slate-800 bg-slate-800/50 p-4 text-sm text-slate-200">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400">
                   Q{i + 1} · {q.topic} · {q.difficulty} ·{" "}
-                  {a.correct === null ? typeLabel(q.type) : a.correct ? "Correct" : "Incorrect"}
+                  {a.correct === null ? typeLabel(q.type) : a.correct ? "Correct ✅" : "Incorrect ❌"}
                   {a.ai ? ` · AI ${a.ai.score}/100` : ""}
                 </p>
-                <p className="mt-1 font-semibold">{q.question}</p>
+                <p className="mt-1 font-semibold text-white">{q.question}</p>
                 <p className="mt-2">
                   <strong>Your answer:</strong> {a.userAnswer || <em>(empty)</em>}
                 </p>
@@ -140,12 +149,12 @@ export default function Results({ questions, answers, config, difficulty, role, 
                     <p className="mt-1">
                       <strong>Correct:</strong> {q.correct_answer}
                     </p>
-                    <p className="mt-1 text-slate-600">{q.explanation}</p>
+                    <p className="mt-1 text-slate-400">{q.explanation}</p>
                   </>
                 ) : a.ai ? (
-                  <div className="mt-2 space-y-1 text-slate-700">
+                  <div className="mt-2 space-y-1 text-slate-300">
                     <p>
-                      <strong>AI verdict ({a.ai.score}/100):</strong> {a.ai.verdict}
+                      <strong className="text-white">AI verdict ({a.ai.score}/100):</strong> {a.ai.verdict}
                     </p>
                     <p>
                       <strong>Got right:</strong> {a.ai.understood || "—"}
@@ -156,13 +165,13 @@ export default function Results({ questions, answers, config, difficulty, role, 
                     <p>
                       <strong>Tip:</strong> {a.ai.tip || "—"}
                     </p>
-                    <p className="text-slate-600">
+                    <p className="text-slate-400">
                       <strong>Model answer:</strong> {q.ideal_answer}
                     </p>
                   </div>
                 ) : (
                   <>
-                    <p className="mt-1 text-slate-600">
+                    <p className="mt-1 text-slate-400">
                       AI feedback was unavailable — model answer: {q.ideal_answer}
                     </p>
                   </>
@@ -173,18 +182,18 @@ export default function Results({ questions, answers, config, difficulty, role, 
         </ol>
       </div>
 
-      <div className="mt-6 rounded-2xl bg-white p-6 shadow-sm sm:p-8">
-        <h3 className="text-lg font-bold">Previous quizzes (this device)</h3>
+      <div className="mt-6 rounded-2xl border border-slate-800 bg-slate-900 p-6 shadow-xl shadow-black/30 sm:p-8">
+        <h3 className="text-lg font-bold text-white">Previous quizzes (this device)</h3>
         {previous.length === 0 ? (
-          <p className="mt-2 text-sm text-slate-500">
+          <p className="mt-2 text-sm text-slate-400">
             This was your first saved quiz on this device. Your next quizzes will
             appear here.
           </p>
         ) : (
           <div className="mt-3 overflow-x-auto">
-            <table className="w-full text-left text-sm">
+            <table className="w-full text-left text-sm text-slate-200">
               <thead>
-                <tr className="border-b text-xs uppercase tracking-wide text-slate-500">
+                <tr className="border-b border-slate-800 text-xs uppercase tracking-wide text-slate-400">
                   <th className="py-2 pr-3">Date</th>
                   <th className="py-2 pr-3">Topic</th>
                   <th className="py-2 pr-3">Difficulty</th>
@@ -193,8 +202,8 @@ export default function Results({ questions, answers, config, difficulty, role, 
               </thead>
               <tbody>
                 {previous.map((s) => (
-                  <tr key={s.id} className="border-b last:border-0">
-                    <td className="py-2 pr-3 text-slate-600">{fmtDate(s.date)}</td>
+                  <tr key={s.id} className="border-b border-slate-800 last:border-0">
+                    <td className="py-2 pr-3 text-slate-400">{fmtDate(s.date)}</td>
                     <td className="py-2 pr-3">{s.topic}</td>
                     <td className="py-2 pr-3">{s.difficulty}</td>
                     <td className="py-2 font-bold">{s.pct}%</td>
@@ -211,9 +220,9 @@ export default function Results({ questions, answers, config, difficulty, role, 
 
 function Stat({ label, value, wide }: { label: string; value: string; wide?: boolean }) {
   return (
-    <div className={`rounded-xl bg-slate-50 px-3 py-3 ${wide ? "col-span-2" : ""}`}>
-      <p className="text-xs text-slate-500">{label}</p>
-      <p className="truncate text-base font-bold" title={value}>
+    <div className={`rounded-xl bg-slate-800 px-3 py-3 ${wide ? "col-span-2" : ""}`}>
+      <p className="text-xs text-slate-400">{label}</p>
+      <p className="truncate text-base font-bold text-white" title={value}>
         {value}
       </p>
     </div>
