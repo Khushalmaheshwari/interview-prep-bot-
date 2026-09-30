@@ -2,7 +2,7 @@ import { useState } from "react";
 import { friendlyError, generateInterview } from "../lib/ai";
 import { type Difficulty, type Question } from "../types";
 import CountInput from "./CountInput";
-import RolePicker from "./RolePicker";
+import RoleCombobox from "./RoleCombobox";
 
 interface Props {
   onDone: (questions: Question[], meta: { role: string; difficulty: Difficulty }) => void;
@@ -66,11 +66,11 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
         are optional context.
       </p>
 
-      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Step 1 — Target role</p>
-      <RolePicker value={role} onChange={setRole} />
+      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Target role</p>
+      <RoleCombobox value={role} onChange={(r) => setRole(r.trim())} placeholder="Type a role, e.g. Marketing Analyst" />
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2">
-        <Field label="Step 2 — 🏢 Company (optional)">
+        <Field label="🏢 Company (optional)">
           <input
             value={company}
             onChange={(e) => setCompany(e.target.value)}
@@ -90,7 +90,7 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
         </Field>
       </div>
 
-      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Step 3 — Difficulty</p>
+      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Difficulty</p>
       <div className="flex flex-wrap gap-2">
         {DIFFS.map((d) => (
           <button key={d} onClick={() => setDifficulty(d)} className={difficulty === d ? activeCls : idleCls}>
@@ -99,7 +99,7 @@ export default function QuickSetup({ onDone, onBack, onClassic }: Props) {
         ))}
       </div>
 
-      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Step 4 — Number of questions</p>
+      <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Number of questions</p>
       <CountInput value={count} onChange={setCount} />
 
       {generating ? (

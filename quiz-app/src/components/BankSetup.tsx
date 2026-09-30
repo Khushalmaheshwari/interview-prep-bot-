@@ -10,7 +10,7 @@ import {
   type Topic,
 } from "../types";
 import CountInput from "./CountInput";
-import RolePicker from "./RolePicker";
+import RoleCombobox from "./RoleCombobox";
 
 interface Props {
   onBankDone: (config: QuizConfig) => void;
@@ -159,7 +159,7 @@ export default function BankSetup({ onBankDone, onTopicDone, onBack }: Props) {
       ) : (
         <>
           <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Role (shapes the questions)</p>
-          <RolePicker value={role} onChange={setRole} />
+          <RoleCombobox value={role} onChange={setRole} />
 
           <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Difficulty</p>
           <div className="flex flex-wrap gap-2">

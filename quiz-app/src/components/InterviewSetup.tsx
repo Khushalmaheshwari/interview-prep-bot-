@@ -2,7 +2,7 @@ import { useState } from "react";
 import { friendlyError } from "../lib/ai";
 import { type Difficulty } from "../types";
 import CountInput from "./CountInput";
-import RolePicker from "./RolePicker";
+import RoleCombobox from "./RoleCombobox";
 
 interface Props {
   initialRole: string;
@@ -37,7 +37,7 @@ export default function InterviewSetup({
       <h2 className="mt-1 text-2xl font-bold text-white">What are you preparing for?</h2>
 
       <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Target role</p>
-      <RolePicker value={role} onChange={setRole} />
+      <RoleCombobox value={role} onChange={setRole} />
 
       <p className="mb-2 mt-6 text-sm font-semibold text-slate-200">Difficulty</p>
       <div className="flex flex-wrap gap-2">
