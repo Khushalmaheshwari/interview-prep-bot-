@@ -1,5 +1,4 @@
 /** Shared bits for Vercel serverless API routes (no Express). */
-import { extractText } from "unpdf";
 
 export function json(res, status, body) {
   res.status(status).setHeader("Content-Type", "application/json");
@@ -16,6 +15,9 @@ export async function extractPdfText(pdfBase64, minChars) {
   if (bytes.subarray(0, 5).toString() !== "%PDF-") {
     throw { reason: "not_a_pdf" };
   }
+  // Lazy import: unpdf pulls heavy pdf.js bundles — load only for PDF routes
+  // so health/evaluate/generate stay light in serverless.
+  const { extractText } = await import("unpdf");
   let text = "";
   try {
     const { text: raw } = await extractText(new Uint8Array(bytes));
